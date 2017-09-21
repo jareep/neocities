@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<service id="message-service" class="flex.messaging.services.MessageService">
+
+    <adapters>
+        <adapter-definition id="actionscript" class="flex.messaging.services.messaging.adapters.ActionScriptAdapter" default="true" />
+        <adapter-definition id="jms" class="flex.messaging.services.messaging.adapters.JMSAdapter"/>
+    </adapters>
+    
+    <default-channels>
+		<channel ref="my-streaming-amf"/>
+		<channel ref="my-polling-amf"/>
+    </default-channels>
+
+    <destination id="neocitiesDS">
+        <properties>
+			<server>
+				<allow-subtopics>true</allow-subtopics>
+			</server>
+		</properties>
+        <channels>
+			<channel ref="neocities-streaming-amf"/>
+		</channels>
+        <adapter ref="actionscript" />       
+    </destination>
+    
+    <destination id="player-stream">
+        <properties>
+			<server>
+				<allow-subtopics>true</allow-subtopics>
+			</server>
+		</properties>
+        <channels>
+			<channel ref="neocities-streaming-amf"/>
+		</channels>
+        <adapter ref="actionscript" />       
+    </destination>
+    
+    <destination id="unit-stream">
+        <properties>
+			<server>
+				<allow-subtopics>true</allow-subtopics>
+			</server>
+		</properties>
+        <channels>
+			<channel ref="neocities-streaming-amf"/>
+		</channels>
+        <adapter ref="actionscript" />       
+    </destination>
+    
+    
+    
+    <destination id="info-stream">
+        <properties>
+			<server>
+				<allow-subtopics>true</allow-subtopics>
+			</server>
+		</properties>
+        <channels>
+			<channel ref="neocities-streaming-amf"/>
+		</channels>
+        <adapter ref="actionscript" />       
+    </destination>
+    
+    <destination id="time-stream">
+        <properties>
+			<server>
+				<allow-subtopics>true</allow-subtopics>
+			</server>
+		</properties>
+        <channels>
+			<channel ref="neocities-streaming-amf"/>
+		</channels>
+        <adapter ref="actionscript" />       
+    </destination>
+    
+    <destination id="timeSync-stream">
+        <properties>
+			<server>
+				<allow-subtopics>true</allow-subtopics>
+			</server>
+		</properties>
+        <channels>
+			<channel ref="neocities-streaming-amf"/>
+		</channels>
+        <adapter ref="actionscript" />       
+    </destination>
+    
+    <destination id="pause-stream">
+        <properties>
+			<server>
+				<allow-subtopics>true</allow-subtopics>
+			</server>
+		</properties>
+        <channels>
+			<channel ref="neocities-streaming-amf"/>
+		</channels>
+        <adapter ref="actionscript" />       
+    </destination>
+    
+    <destination id="location-stream">
+        <properties>
+			<server>
+				<allow-subtopics>true</allow-subtopics>
+			</server>
+		</properties>
+        <channels>
+			<channel ref="neocities-streaming-amf"/>
+		</channels>
+        <adapter ref="actionscript" />       
+    </destination>
+    
+    
+    <destination id="console-stream">
+        <properties>
+			<server>
+				<allow-subtopics>true</allow-subtopics>
+			</server>
+		</properties>
+        <channels>
+			<channel ref="neocities-streaming-amf"/>
+		</channels>
+        <adapter ref="actionscript" />       
+    </destination>
+    
+     <destination id="score-stream">
+        <properties>
+			<server>
+				<allow-subtopics>true</allow-subtopics>
+			</server>
+		</properties>
+        <channels>
+			<channel ref="neocities-streaming-amf"/>
+		</channels>
+        <adapter ref="actionscript" />       
+    </destination>
+
+     <destination id="ah-stream">
+        <properties>
+			<server>
+				<allow-subtopics>true</allow-subtopics>
+			</server>
+		</properties>
+        <channels>
+			<channel ref="neocities-streaming-amf"/>
+		</channels>
+        <adapter ref="actionscript" />       
+    </destination>
+    
+    <destination id="ih-stream">
+        <properties>
+			<server>
+				<allow-subtopics>true</allow-subtopics>
+			</server>
+		</properties>
+        <channels>
+			<channel ref="neocities-streaming-amf"/>
+		</channels>
+        <adapter ref="actionscript" />       
+    </destination>
+    
+   	<destination id="eh-stream">
+        <properties>
+			<server>
+				<allow-subtopics>true</allow-subtopics>
+			</server>
+		</properties>
+        <channels>
+			<channel ref="neocities-streaming-amf"/>
+		</channels>
+        <adapter ref="actionscript" />       
+    </destination>
+    
+    
+    <destination id="oh-stream">
+        <properties>
+			<server>
+				<allow-subtopics>true</allow-subtopics>
+			</server>
+		</properties>
+        <channels>
+			<channel ref="neocities-streaming-amf"/>
+		</channels>
+        <adapter ref="actionscript" />       
+   	</destination>
+    
+   	<destination id="qh-stream">
+        <properties>
+			<server>
+				<allow-subtopics>true</allow-subtopics>
+			</server>
+		</properties>
+        <channels>
+			<channel ref="neocities-streaming-amf"/>
+		</channels>
+        <adapter ref="actionscript" />       
+   	</destination>
+    
+    
+	<destination id="sync-stream">
+        <properties>
+			<server>
+				<allow-subtopics>true</allow-subtopics>
+			</server>
+		</properties>
+        <channels>
+			<channel ref="neocities-streaming-amf"/>
+		</channels>
+        <adapter ref="actionscript" />       
+    </destination>
+    
+    <destination id="scenario-stream">
+        <properties>
+			<server>
+				<allow-subtopics>true</allow-subtopics>
+			</server>
+		</properties>
+        <channels>
+			<channel ref="neocities-streaming-amf"/>
+		</channels>
+        <adapter ref="actionscript" />       
+    </destination>
+    
+    <destination id="environment-stream">
+        <properties>
+			<server>
+				<allow-subtopics>true</allow-subtopics>
+			</server>
+		</properties>
+        <channels>
+			<channel ref="neocities-streaming-amf"/>
+		</channels>
+        <adapter ref="actionscript" />       
+    </destination>
+
+    <destination id="chat">
+        <properties>
+			<server>
+				<allow-subtopics>true</allow-subtopics>
+			</server>
+		</properties>
+        <channels>
+			<channel ref="neocities-streaming-amf"/>
+		</channels>
+        <adapter ref="actionscript" />       
+    </destination>
+       
+
+
+</service>

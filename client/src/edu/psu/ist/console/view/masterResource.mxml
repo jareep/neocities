@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Panel 
+		 xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 width="100%" height="100%" 
+		 title="Live Game View"
+		 creationComplete="initView()">
+		  
+	<fx:Script>
+	<![CDATA[				
+		import edu.psu.ist.neocities.value.*;
+   		import edu.psu.ist.neocities.model.*;
+		import edu.psu.ist.neocities.oldValue.*;
+	
+		import com.pnwrain.easyCG.model.ModelFactory;
+		import com.pnwrain.easyCG.events.ControlEvent;
+		import mx.collections.ArrayCollection;
+		import mx.controls.Image;
+		
+		
+		
+		[Bindable]
+		private var rModel : ResourceModel = ModelFactory.getModel("ResourceModel") as ResourceModel;
+		
+		[Bindable]
+		private var uModel : UnitModel = ModelFactory.getModel("UnitModel") as UnitModel;
+		
+		[Bindable]				
+		private var pModel : RoleModel = ModelFactory.getModel("RoleModel") as RoleModel;																															
+						
+		public function initView(): void {				 									
+			//resourceCollection = pModel.currentPlayer.resources;						
+		}
+								
+		private function changeStateRequest( _msg : String ) : void
+		{
+			var event : ControlEvent = new ControlEvent('changeStateRequest');
+			event.data =  _msg;
+			event.dispatch();
+			//iModel.selectedIncident = null;
+		}
+		
+		private function getResourceLabel ( item : Object) : String {            	
+	    	var unit : UnitVO = item as UnitVO;
+	    	var resource : ResourceVO = rModel.getResource(unit.resourceID.toString());
+	    	var label : String;
+	    	label = "#" + unit.badgeNo;
+	    	
+	    	return label;            	
+	    }
+		
+		private function getResourceIcon ( item : Object) : Class {            	
+	    	var unit : UnitVO = item as UnitVO;
+	    	return rModel.getIcon(unit.resourceID.toString(), unit.available);
+	 	}  		    
+		    			
+	]]>
+	</fx:Script>
+
+ <!--===============================================================================\
+   | U.I. Code
+ \================================================================================-->
+		
+	<s:VGroup width="100%" height="100%" horizontalAlign="center" >
+		<s:Label text="Master Resource Display" />
+		<mx:VBox width="100%" height="100%" paddingLeft="10" verticalAlign="middle">	
+			<!-- leave this as a VBOX also removed this from list backgroundDisabledColor="#ffffff" 
+			Need to fix it so it shows grayed out if not available
+			-->
+			<mx:Repeater id="rList" dataProvider="{rModel.data}" height="100%" >
+				<s:Label id="rLabel" text="{rList.currentItem.label}" fontSize="12" fontStyle="normal" paddingTop="0" paddingBottom="0" />
+				<s:List  id="horizontallist1"
+					dataProvider="{uModel.getResourceUnits(rList.currentItem.resourceID)}" 
+					itemRenderer="edu.psu.ist.neocities.component.OldComponent.DispatchLabel"
+				    borderVisible="false"
+				    width="100%"
+				    enabled="false" 
+				    >
+					<s:layout>
+						<s:HorizontalLayout paddingTop="0" paddingBottom="0" columnWidth="40" />
+					</s:layout>
+				</s:List> 			
+			</mx:Repeater>		
+		</mx:VBox>	
+			
+	</s:VGroup>
+	
+</s:Panel>

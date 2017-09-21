@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
+				xmlns:s="library://ns.adobe.com/flex/spark"
+				xmlns:mx="library://ns.adobe.com/flex/mx"
+				width="400" height="300" 
+				title="Initialize Scenario"
+				close="removeMe()"
+				creationComplete="initView()">
+
+	
+	<fx:Script>
+		<![CDATA[
+			import edu.psu.ist.neocities.value.PlayerVO;
+			import edu.psu.ist.neocities.model.RoleModel;
+		
+		import com.pnwrain.easyCG.events.ControlEvent;
+		import edu.psu.ist.console.value.ScenarioVO;
+		import edu.psu.ist.neocities.model.PlayerModel;
+		import edu.psu.ist.neocities.value.RoleVO;
+		import com.pnwrain.easyCG.model.ModelFactory;		
+		import mx.managers.PopUpManager;
+			
+		[Bindable]
+		private var playerModel : PlayerModel = ModelFactory.getModel("PlayerModel") as PlayerModel;
+		
+		[Bindable]
+		private var rModel : RoleModel = ModelFactory.getModel("RoleModel") as RoleModel;
+		
+		private function initView() : void
+		{
+				var event : ControlEvent = new ControlEvent('evt_initClient');
+				event.dispatch();
+				
+				this.closeButton.visible = true;
+				PopUpManager.centerPopUp(this);
+				
+				playerModel.clearModel();
+							
+		}
+		
+		/****************************************************************
+	     * View State Event Calls
+	     ****************************************************************/		
+		
+		private function changeStateRequest( _msg : String ) : void
+		{
+			var event : ControlEvent = new ControlEvent('evt_StateChange');
+			event.data =  _msg;
+			event.dispatch();				
+		}
+		
+				
+
+		
+		
+		/****************************************************************
+	     * Console State Changes
+	     ****************************************************************/
+			        
+         
+        private function startScenario() : void {
+
+        	//this.changeStateRequest('scenarioStart');
+        	//this.currentState='scenarioStart';
+        	
+			this.serviceCall('simStart'); 
+			
+			this.clearScenarioData();
+			
+			
+        	PopUpManager.removePopUp(this);
+        	
+        	//var event : ControlEvent = new ControlEvent('evt_sessionInfo');
+			var event : ControlEvent = new ControlEvent('evt_scenarioStart');
+        	event.dispatch();
+        	
+        	}
+        	
+        	private function formatRoleName(item : Object, col:DataGridColumn) : String
+            {
+            	var player : PlayerVO = item as PlayerVO;
+            	
+            	var role : RoleVO = rModel.getPlayer(player.roleID);
+            	
+            	return role.role;
+            }
+            
+            private function removeMe() : void
+            {
+            	PopUpManager.removePopUp(this);
+            	
+            	var event : ControlEvent = new ControlEvent('evt_resetServer');
+				event.dispatch();		
+            }
+			
+			private function serviceCall( msg : String) : void 
+			{	
+				trace(msg);
+				var event : ControlEvent = new ControlEvent('evt_serverCall');
+				event.data = msg;
+				event.dispatch();			
+			}
+			
+			
+			private function clearScenarioData() : void {
+				var event : ControlEvent = new ControlEvent('evt_clearData');
+				event.dispatch();
+			}
+        	
+        	       	
+		]]>
+	</fx:Script>  
+	<s:VGroup height="100%" width="100%">
+		<mx:DataGrid height="90%" width="100%" dataProvider="{playerModel.players}">
+			<mx:columns>
+				<mx:DataGridColumn headerText="Role" dataField="roleID" labelFunction="formatRoleName"/>
+				<mx:DataGridColumn headerText="User Name" dataField="userName"/>
+				<mx:DataGridColumn headerText="NC Version" dataField="currentFlexVersion"/>
+			</mx:columns>
+		</mx:DataGrid>
+		<s:Button label="Start Scenario" width="100%" click="startScenario()"/>
+	</s:VGroup>
+	
+</s:TitleWindow>

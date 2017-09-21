@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Application
+	xmlns:fx="http://ns.adobe.com/mxml/2009"
+	xmlns:s="library://ns.adobe.com/flex/spark"
+	xmlns:mx="library://ns.adobe.com/flex/mx"
+	xmlns:ns1="net.goozo.mx.dockable.*" 
+	xmlns:c="edu.psu.ist.console.control.*"
+	xmlns:m="edu.psu.ist.console.model.*"
+	xmlns:v="edu.psu.ist.console.view.*"
+	xmlns:sv="edu.psu.ist.console.service.*"
+	xmlns:ncc="edu.psu.ist.neocities.control.*"
+	xmlns:ncm="edu.psu.ist.neocities.model.*"
+	xmlns:temp="edu.psu.ist.neocities.oldModel.*"
+	xmlns:ncv="edu.psu.ist.neocities.view.*"
+	xmlns:net="flash.net.*"
+	creationComplete="initApp()"
+	controlBarVisible="true" >
+
+ <fx:Script>
+ 	<![CDATA[
+		import com.pnwrain.easyCG.events.ControlEvent;
+		import com.pnwrain.easyCG.model.ModelFactory;
+		
+		import edu.psu.ist.console.value.TimelineVO;
+		import edu.psu.ist.console.view.ScenarioStart;
+		import edu.psu.ist.console.view.SessionInfo;
+		import edu.psu.ist.neocities.model.PlayerModel;
+		import edu.psu.ist.neocities.oldValue.IncidentVO;
+		import edu.psu.ist.neocities.value.PlayerVO;
+		import edu.psu.ist.neocities.view.OldView.Inspector;
+		
+		import mx.controls.Alert;
+		import mx.events.CloseEvent;
+		import mx.events.FlexEvent;
+		import mx.managers.PopUpManager;
+ 	
+ 	private const TIMER_INTERVAL:int = 1000;
+    private var baseTimer:int;
+    private var simTimer : Timer;
+    private var versionVO : PlayerVO = new PlayerVO();
+    	
+ 	public function initApp() : void {
+ 		mainController.setStateChangeHandler(doChangeState);
+ 		mainController.setStartTimerHandler(doStartTimer);
+		mainController.setStopTimerHandler(doStopTimer);
+		mainController.setLaunchInspectorHandler(doLaunchInspector);
+		mainController.setTabSelectHandler(doTabSelect);
+		mainController.setInitCompleteHandler(doInitComplete);
+		mainController.setScenarioStartHandler(doScenarioStart);
+		mainController.setResetSecenarioHandler(doResetScenario);
+		mainController.setSessionInfoHandler(doGetSessionInfo);
+		mainController.setSubscribeAllHandler(subscribe);
+		
+		mainController.setPauseAlertHandler(doPauseAlert);
+				
+		//initialize the simulation Timer
+		simTimer = new Timer(TIMER_INTERVAL);
+        simTimer.addEventListener(TimerEvent.TIMER, updateTimer);
+ 		
+ 		footerText.text = footerText.text +  " v"  + versionVO.currentFlexVersion;	
+ 		
+		//this.subscribe(null);
+		menuBar.init();
+		
+		var adminEvent : ControlEvent = new ControlEvent('evt_PlayerAdmin');
+		adminEvent.dispatch();	
+ 	}
+ 	
+ 	private function subscribe(event : ControlEvent) : void
+	{							
+		
+		var consoleEvent : ControlEvent = new ControlEvent('evt_subscribeConsole');
+		consoleEvent.dispatch();
+		
+		
+		var gameEvent : ControlEvent = new ControlEvent('evt_subscribe');
+		gameEvent.dispatch();	
+	}	
+ 	
+ 	private function doChangeState( event : ControlEvent ) : void
+	{
+		var newState : String = event.data.toString();
+		trace("NeoConsole - Changing state to '"+newState+"'");
+		currentState = newState;
+		
+		if (currentState == "scenarioStart"){
+			menuBar.currentState = "scenarioStart";
+			vs.creationPolicy="all";
+		}		
+	}
+		
+	private function doTabSelect ( event : ControlEvent ) : void 
+	{
+		
+		if (event.data == "game")
+		{
+			//tab.selectedChild = gameView;
+			//tab.selectedItem = gameView;
+		}
+		else if (event.data == "score")
+		{
+			tab.selectedItem = scoringView;			
+		}
+		else if(event.data=="actionHistory"){
+			//tab.selectedItem = gameView;
+		}
+		else
+		{
+			tab.selectedItem = systemView;
+		} 
+	}
+	
+	/****************************************************************
+	 * Timer Functions
+	 ****************************************************************/
+	private function doStartTimer(event : ControlEvent):void {
+	    trace("Starting Timer");
+	    baseTimer = getTimer();
+	    simTimer.start();
+	}
+	
+	private function doStopTimer(event : ControlEvent):void {
+	    	
+		Alert.show("Click OK to save the NeoCITIES Data...","Save", Alert.OK,null,this.systemView.saveData);
+
+		simTimer.stop();
+		this.menuBar.stop();
+	}
+		
+	private function updateTimer(evt:TimerEvent):void {            
+	    var d:Date = new Date(getTimer() - baseTimer);
+	    timeModel.updateSimTime(d);            
+	}
+	
+	/****************************************************************
+	 * Pop-up Windows
+	 ****************************************************************/	
+	private function doLaunchInspector(event : ControlEvent) : void {
+		var incident : IncidentVO = event.data as IncidentVO;           
+   		trace("launching Inspector Popup from NeoCities.mxml");
+       	var inspectorPopup : Inspector = Inspector(PopUpManager.createPopUp(this, Inspector, false));
+
+        //inspectorPopup.title = incident.label;
+        inspectorPopup.incident = incident;
+        
+        return void;
+	}
+	
+	private function doInitComplete(event : ControlEvent) : void {
+		var scenarioStart : ScenarioStart = ScenarioStart(PopUpManager.createPopUp(this, ScenarioStart, true));
+	}
+		
+	private function doGetSessionInfo(event : ControlEvent) : void {
+		var sessionInfo :SessionInfo = SessionInfo(PopUpManager.createPopUp(this, SessionInfo, true));
+	}
+	
+	public function doScenarioStart(event : ControlEvent) : void {
+		menuBar.changeToScenarioState();	
+	}
+	
+	public function doResetScenario(event : ControlEvent) : void {
+				
+    	var pModel : PlayerModel = ModelFactory.getModel("PlayerModel") as PlayerModel;
+		
+		menuBar.changeToServerStartState();
+		
+		pModel.clearModel();
+	}
+	
+	public function doPauseAlert (event : ControlEvent) : void {
+		Alert.show("The Pause has been dispatched");
+				
+		var tlVO :TimelineVO = new TimelineVO()
+		tlVO.type = "Pause";
+		tlVO.message = "Scenario Pause";
+		
+		var tlEvent : ControlEvent = new ControlEvent('evt_logTimeline');
+		tlEvent.data = tlVO;
+		tlEvent.dispatch();
+		
+	}
+		
+	public function doEnterState (event : FlexEvent) : void
+	{
+	/*	<mx:SetProperty target="{gameView}" name="enabled" value="true" />
+			<mx:SetProperty target="{scoringView}" name="enabled" value="true" />
+			<mx:SetProperty target="{eventHistory}" name="enabled" value="true" />
+			<mx:SetProperty target="{actionHistory}" name="enabled" value="true" />
+			<mx:SetProperty target="{orderHistory}" name="enabled" value="true" />*/
+		tab.enabled = true;
+		mainScreen.gap = 0;
+	}
+	
+	 ]]>
+ </fx:Script>	
+
+ <fx:Style source="edu/psu/ist/neocities/assets/redefinedStyles.css" />
+
+ <!--===============================================================================\
+   | Singleton model and controller objects
+ \================================================================================-->
+	<fx:Declarations>
+		<c:MainController id="mainController" />
+		
+		<c:ConsoleController />
+		<sv:ServiceFacade />
+		<m:MessageModel />
+		<m:EventModel />
+		<m:ScenarioModel />
+		<m:HistoryModel />	
+		<m:ChatModel />
+		<m:TimelineModel />
+		<m:SessionModel />
+			
+		<ncc:ServiceController />
+		
+		<ncm:LocationModel />
+		<ncm:InformationModel />
+		<ncm:ImageModel />
+		<ncm:RoleModel />
+		<ncm:PauseModel />
+		<ncm:ResourceModel />
+		
+		<ncm:UnitModel />
+		<ncm:TimeModel id="timeModel" />
+		<ncm:ScoreModel />
+		<ncm:PlayerModel />
+		<ncm:ErrorModel />
+		<temp:IncidentModel />
+		
+		<net:FileReference id="fileReference" />
+		
+		<mx:DateFormatter id="dateFormatter"
+						  formatString="MM-DD-YYYY (LL NN A)"
+						  />
+		<mx:DateFormatter id="dateOnly" formatString="MM-DD-YYYY" />
+		<mx:DateFormatter id="timeOnly" formatString="LL:NN A" />
+		
+
+	</fx:Declarations>
+
+ <!--===============================================================================\
+ | Application canvas and default View
+ \================================================================================-->	 
+	<s:controlBarContent>
+		<v:menu id="menuBar" />
+	</s:controlBarContent>	
+			
+	<s:VGroup id="mainScreen" width="100%" height="100%" paddingBottom="0" paddingRight="0" paddingLeft="0" paddingTop="2" gap="0" gap.serverStart="0">
+
+			<s:TabBar id="tab" enabled="false" height="3%" dataProvider="{vs}"/>
+			
+			<mx:ViewStack id="vs" width="100%" height="100%" enabled="true" paddingTop="0" paddingBottom="4">
+	            <v:system id="systemView" />
+				<v:system2 id ="quickView" />
+	            <!--<v:game id="gameView" />-->
+	            <v:scenarioScores id="scoringView" />
+	            <v:eventHistory id="eventHistory" />
+	            <v:actionHistory id="actionHistory"  />
+	            <v:informationHistory id="infoHistory"  />
+				<v:QuestionHistory id ="questionHistory" />
+			</mx:ViewStack>
+	        
+		
+		<s:Label text="Copyright 2009 The Pennsylvania State Universityxxx" fontSize="10" id="footerText" height="2%" width="100%" textAlign="center" height.serverStart="2%"/>
+	</s:VGroup> 
+ <!--===============================================================================\
+   | Application States
+ \================================================================================-->
+ 	
+ 	<s:states>	 		
+ 		<s:State name="serverStart" />
+ 		<s:State name="scenarioStart" enterState="doEnterState(event)" />
+ 	</s:states>	        
+	  	         	        
+</s:Application>

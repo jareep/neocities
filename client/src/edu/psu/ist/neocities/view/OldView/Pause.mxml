@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+<s:Panel xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 xmlns:ns1="edu.psu.ist.neocities.view.*"
+		 width="100%" height="100%"		  
+		 creationComplete="initView()" 
+		 >
+	<s:layout>
+		<s:VerticalLayout  verticalAlign="middle" horizontalAlign="center" />
+	</s:layout>  
+	
+	<fx:Script>
+		<![CDATA[
+			import com.pnwrain.easyCG.events.ControlEvent;
+			import com.pnwrain.easyCG.model.ModelFactory;
+			
+			import edu.psu.ist.console.value.QuestionHistoryVO;
+			import edu.psu.ist.neocities.model.PauseModel;
+			import edu.psu.ist.neocities.model.TimeModel;
+			import edu.psu.ist.neocities.value.QuestionAnswerVO;
+			import edu.psu.ist.neocities.value.QuestionVO;
+			
+			import flash.events.TimerEvent;
+			import flash.net.navigateToURL;
+			import flash.system.Capabilities;
+			import flash.utils.Timer;
+			
+			import mx.controls.Alert;
+			import mx.managers.PopUpManager;	
+			
+			[Bindable]
+			private var pModel : PauseModel = ModelFactory.getModel("PauseModel") as PauseModel;
+			
+			[Bindable]
+			private var tModel : TimeModel = ModelFactory.getModel("TimeModel") as TimeModel;
+						
+			private var baseTimer:int;
+
+			private var pauseTimer : Timer;
+			
+			private var curQuestion :QuestionVO;
+			
+			private var qhVO : QuestionHistoryVO;
+						
+			private function initView() : void
+			{	
+				
+				this.height = Capabilities.screenResolutionY;
+				this.width = Capabilities.screenResolutionX;
+				
+				PopUpManager.centerPopUp(this);
+							
+				this.displayQuestion();
+							
+				this.isPopUp = false;
+			
+				this.startTimer();			
+			}
+			
+			public function displayQuestion() : void
+			{
+								
+				this.curQuestion = pModel.pause.getNextQuestion();
+				this.questionContainer.removeAllElements();
+				
+				if (this.curQuestion == null)
+				{
+					this.message.visible = true;
+					this.submit.enabled = false;
+					this.skip.enabled= false;
+				}
+				else
+				{
+					this.newQH();
+					
+					
+					if (this.curQuestion.type == "INTRO")
+					{
+						this.submit.enabled = false;
+						this.skip.enabled= false;
+						this.introTimer();
+					}
+					else
+					{
+						this.submit.enabled = true;
+						this.submit.label = "SUBMIT";
+						this.skip.enabled= true;
+					}
+						
+					
+					this.questionContainer.addElement(this.curQuestion.getQuestionUI());
+				}
+					
+			}
+			
+			public function introTimer() : void
+			{
+				var introTimer : Timer = new Timer((pModel.pause.introSec * 1000), 1);
+				
+				
+				introTimer.start();
+				introTimer.addEventListener(TimerEvent.TIMER_COMPLETE, introComplete);
+			}
+			
+			
+			public function introComplete (event : TimerEvent) : void
+			{
+				//this.sendQH(tModel.masSec, true);
+				this.displayQuestion();
+			}
+         			
+			public function startTimer() : void {				
+				//start Timer based on PauseDuration
+				pauseTimer = new Timer(pModel.pause.pauseDuration, 1);
+				pauseTimer.start();
+				
+				pauseTimer.addEventListener(TimerEvent.TIMER_COMPLETE, timerComplete);			
+			}
+			
+			private function timerComplete( event : TimerEvent ) : void 
+			{				
+				this.submitNonAnsweredQuestions();					
+				
+				PopUpManager.removePopUp(this);  	
+			}	
+			
+			private function submitNonAnsweredQuestions() : void
+			{
+				while (this.curQuestion != null)
+				{
+					if (this.curQuestion.answer != null)
+					{
+						// fill in the answer and time
+						this.sendQH(tModel.masSec, false);
+					}
+					else
+					{
+						// dont fill in the answer
+						this.qhVO.answerValue = "{miss}";
+						this.qhVO.questionTime = -1;
+						this.qhVO.correct = 0;
+						this.sendQH(-1, false);
+					}
+					
+					this.curQuestion = pModel.pause.getNextQuestion();
+					
+					if (this.curQuestion != null)
+					{
+						this.newQH();	
+					}											
+				}
+			}
+			
+			private function newQH() : void
+			{
+				this.qhVO = new QuestionHistoryVO();
+				qhVO.questionTime = tModel.masSec;
+				qhVO.questionId = this.curQuestion.questionID;
+			}
+			
+			protected function submit_clickHandler(event:MouseEvent):void
+			{
+				//"evt_sendQuestionAnswer"
+				
+				this.sendQH(tModel.masSec, true);
+				this.displayQuestion();
+			}
+			
+			private function sendQH(time:int, skipped:Boolean) : void
+			{
+				//Alert.show(this.curQuestion.answer);
+				this.qhVO.answerTime = time;
+				
+				if (time != -1)
+				{
+					if (this.curQuestion.type == "MC")
+					{
+						if (this.curQuestion.answer.value != "-9999")
+						{	
+							this.qhVO.answerValue = this.curQuestion.answer.value;
+							this.qhVO.correct = this.curQuestion.answer.correct;
+						}
+						else
+						{
+							if (skipped)
+							{
+								this.qhVO.answerValue = "{skipped}";
+								this.qhVO.correct = 0;
+								
+							}
+							else
+							{
+								this.qhVO.answerValue = "{miss}";
+								this.qhVO.correct = 0;
+							}
+						}
+						
+					}
+					else if (this.curQuestion.type == "INTRO")
+					{
+						this.qhVO.answerValue = "{intro}";
+						this.qhVO.correct = -9999;
+					}
+					else if (this.curQuestion.type == "SA")
+					{
+						if (this.qhVO.answerValue != "{miss}")
+						{
+							this.qhVO.answerValue = this.curQuestion.textAnswerValue;
+							this.qhVO.correct = -9999;
+						}
+						else
+						{
+							this.qhVO.correct = 0;
+						}
+					}
+				}
+				
+				var event2 : ControlEvent = new ControlEvent('evt_sendQuestionAnswer');
+				event2.data = this.qhVO;
+				event2.dispatch();
+				
+			}
+
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<mx:DateFormatter id="dateFormatter" formatString="NN:SS" />
+	</fx:Declarations>
+	
+ <!--===============================================================================\
+   | U.I. Code
+ \================================================================================-->
+
+		<mx:TextArea width="100%" wordWrap="true" text="{pModel.pause.msg}"  fontSize="12" borderStyle="none" editable="false"/>
+		
+		<s:VGroup id="test" width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+			<mx:Label id="message" visible="false" selectable="true" htmlText="{pModel.pause.link}"  fontSize="16" fontWeight="bold"/>
+			<s:Group id="questionContainer" />
+			<s:HGroup id="subSkip">
+				<s:Button id="skip" enabled="false" label="Skip" click="submit_clickHandler(event)"/>
+				<s:HGroup width="5" />
+				<s:Button id="submit" enabled="false" label="SUBMIT" click="submit_clickHandler(event)"/>
+			</s:HGroup>
+		</s:VGroup>
+		
+		<s:HGroup width="100%" horizontalAlign="center" verticalAlign="bottom">
+			<s:Label text="This simulation will resume in : " fontSize="12"/>
+			<s:Label id="counterLabel" text="{pModel.pause.pauseDuration / 1000} seconds"  fontWeight="bold"  fontSize="12"/>
+		</s:HGroup>
+
+</s:Panel>
+

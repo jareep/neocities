@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This function is not used at all... It was initially for the scenario designer, but that is no longer used
+<mx:TitleWindow 
+	xmlns:mx="http://www.adobe.com/2006/mxml" 
+	xmlns:awx="http://www.arcwebservices.com/2007/awx"
+	showCloseButton="true" 
+    width="350" height="325" 
+    borderAlpha="1"
+	creationComplete="initView()">
+	
+	<mx:Script>
+	<![CDATA[
+			
+		import com.esri.aws.awx.geom.PointShape;
+		import com.esri.aws.awx.map.layers.overlays.Marker;
+		import com.esri.aws.awx.map.layers.overlays.style.ImageMarkerStyle;
+										
+		private function initView() : void {					
+			
+											
+		}
+				
+		public function grabCoords() : void
+		{	
+			map.markerLayer.removeAllOverlays();
+			
+			var marker : Marker = new Marker();
+				marker.label = 'centerGeoX, centerGeoY';
+				marker.geoX = map.centerGeoX;
+				marker.geoY = map.centerGeoY;
+			
+			map.markerLayer.addOverlay(marker);
+			
+			longitudeNew.text = map.centerGeoX.toString();
+			latitudeNew.text = map.centerGeoY.toString();
+						
+		}
+								
+   			 
+						
+	]]>
+	</mx:Script>
+	
+	<mx:Canvas label="MapArea" width="100%" height="100%"  backgroundColor="#77D264">
+    		
+		<awx:Framework apiKey="935480bb75736aab6d92e259f14ec5f7">
+			<awx:MapImageActivator/>
+		</awx:Framework>			
+
+   		<awx:Map id="map" centerGeoX="-77.8678" centerGeoY="40.7938" scale="10000" createDefaultLayers="true" >
+   			<awx:basemaps />   			
+   			<awx:MarkerLayer id="mapMarkers"/>
+   		</awx:Map>
+   		   		
+   	</mx:Canvas>
+   	<mx:HBox width="100%" verticalAlign="middle" horizontalAlign="center">
+       	<mx:Label text="X:" fontWeight="bold" textAlign="left" />
+		<mx:Label id="longitudeNew" text="" textAlign="left" />
+       	<mx:Label text="Y:" fontWeight="bold" textAlign="left" />
+		<mx:Label id="latitudeNew" text="" textAlign="left" />			
+	</mx:HBox>									
+   	 <mx:HBox>
+        <mx:Button id="grabButton" label="Grab Coords" click="this.grabCoords();"/>
+        <mx:Button id="okButton" label="OK"/>
+        <mx:Button id="cancelButton" label="Cancel"/>
+    </mx:HBox>
+			
+</mx:TitleWindow>-->

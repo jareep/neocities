@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
+				xmlns:s="library://ns.adobe.com/flex/spark"
+				xmlns:mx="library://ns.adobe.com/flex/mx"
+		  		horizontalAlign="center" verticalAlign="top"		   
+				showCloseButton="true"
+		  		close="removeMe()"
+		  		mouseDownOutside="removeMe()"
+		  		creationComplete="initComponent()"
+		  		width="400"
+		  		height="450"
+		  		title="Event Inspector">
+	<fx:Style>
+		@namespace s "library://ns.adobe.com/flex/spark";
+		@namespace mx "library://ns.adobe.com/flex/mx";
+		
+		.wordWrap {
+			lineBreak: toFit;
+		}
+		
+	</fx:Style>
+	<fx:Script>
+		<![CDATA[
+			import edu.psu.ist.neocities.value.*;
+			import edu.psu.ist.neocities.model.*;
+			import edu.psu.ist.neocities.oldValue.*;
+			
+			import com.pnwrain.easyCG.model.ModelFactory;
+			import com.pnwrain.easyCG.events.ControlEvent;
+			import mx.collections.ArrayCollection;
+			import mx.managers.PopUpManager;
+									
+			[Bindable]
+			public var incident : IncidentVO;
+			
+			[Bindable]
+			public var onRouteUnits : ArrayCollection;
+			
+			[Bindable]
+			public var onSceneUnits : ArrayCollection;
+			
+			
+			[Bindable]
+			private var uModel : UnitModel = ModelFactory.getModel("UnitModel") as UnitModel;
+			
+			[Bindable]
+			private var rModel : ResourceModel = ModelFactory.getModel("ResourceModel") as ResourceModel;
+			
+		   	[Bindable]
+		   	private var roleModel : RoleModel = ModelFactory.getModel("RoleModel") as RoleModel;		
+							
+			public function initComponent(): void {				 
+				PopUpManager.centerPopUp(this);
+				trace("passed incidentID = " + incident.incidentID);				
+			}
+						
+			private function removeMe():void {
+                // Put any clean-up code here.
+                PopUpManager.removePopUp(this);              
+            }
+                                             
+            private function getResourceIcon ( item : Object) : Class {            	
+            	var unit : UnitVO = item as UnitVO;
+            	return rModel.getIcon(unit.resourceID.toString(), true);            	
+            }
+            
+                        											
+		]]>
+	</fx:Script>
+		
+ <!--===============================================================================\
+   | U.I. Code
+ \================================================================================-->
+	
+	<s:BorderContainer width="100%" height="10%">
+		<s:layout>
+			<s:HorizontalLayout verticalAlign="top" horizontalAlign="left" paddingLeft="10" />
+		</s:layout>
+		
+		<mx:Image id="incidentIcon" source="edu/psu/ist/neocities/assets/event_icons_normal/{incident.icon}" />
+		<s:BorderContainer width="100%" height="100%">		
+			<s:layout>
+				<s:VerticalLayout verticalAlign="middle" paddingLeft="10" /> 
+			</s:layout>
+						
+			<s:TextArea text="{incident.label}"
+						styleName="wordWrap"
+						 fontWeight="bold"
+						 fontSize="14"
+						 width="100%" height="100%"
+						 editable="false"
+						 selectable="false"						   
+						 borderVisible="false" />
+						 
+		</s:BorderContainer>				
+	</s:BorderContainer>
+	
+	<s:ButtonBar dataProvider="{vs}" />
+	
+	<mx:ViewStack id="vs" width="100%" height="100%" borderStyle="solid">
+		<!-- Incident Details Panel -->
+		<s:NavigatorContent label="Incident Details">
+			<s:BorderContainer width="100%" height="100%" >
+				<s:BorderContainer id="vbox1" width="100%" height="100%" >
+					<s:layout>
+						<s:VerticalLayout verticalAlign="top" paddingLeft="10" />
+					</s:layout>
+					
+					<s:Label text="Time Reported:" fontWeight="bold" />
+					<s:Label text="{incident.dispatchTime}" fontWeight="normal" />
+					
+					<s:Label text="Status:" fontWeight="bold" />
+					<mx:Label text="{incident.status}" fontWeight="normal" />
+					
+					<s:Label text="Description" fontWeight="bold" />
+					<s:TextArea  text="{incident.getDescription(int(roleModel.currentPlayer.roleID))}" styleName="wordWrap" width="{vbox1.width - 10}" borderVisible="false" textAlign="left" height="100%" editable="false"/>
+											 
+					<s:Label text="GPS Latitude:" fontWeight="bold" />
+					<s:Label text="{incident.lat}" fontWeight="normal" />
+					
+					<s:Label text="GPS Longitude:" fontWeight="bold" />
+					<s:Label text="{incident.long}" fontWeight="normal" />
+				
+				</s:BorderContainer>
+			</s:BorderContainer>
+		</s:NavigatorContent>
+				
+		<!-- Unit Reports Panel -->
+		<s:NavigatorContent label="Team Activity">
+			<s:BorderContainer width="100%" height="100%"  borderVisible="false">
+				
+				<s:BorderContainer id="reportBox" width="100%" height="100%">
+					<s:layout>
+						<s:VerticalLayout paddingLeft="0" paddingRight="0" verticalAlign="top" horizontalAlign="center" />
+					</s:layout>
+					
+					<mx:DataGrid id="unitReportsGrid" 
+						width="100%" height="100%" rowHeight="55" 
+						dataProvider="{uModel.getUnits(incident.incidentID as String)}"  borderStyle="none">
+			        	<mx:columns>	       
+			        		<mx:DataGridColumn dataField="icon" width="40" headerText="Unit" textAlign="center">
+								<mx:itemRenderer>	
+									<fx:Component>
+			        					<mx:VBox width="40" height="50" verticalAlign="middle" horizontalAlign="center"
+												 horizontalScrollPolicy="off" verticalScrollPolicy="off">
+											<mx:Image source="{data.icon}" height="100%" width="30" />
+											<mx:Text text="#{data.badgeNo}" />
+			        					</mx:VBox>								               
+			        				</fx:Component>
+			        			</mx:itemRenderer>			
+			        		</mx:DataGridColumn>
+			        		
+			        		<mx:DataGridColumn dataField="status" width="60" headerText="Status" wordWrap="true" textAlign="center" />
+			        		
+			        		<mx:DataGridColumn dataField="playerMessage" headerText="Report" wordWrap="true" textAlign="left"  />	        		
+			        		    				
+				    	</mx:columns>
+				    </mx:DataGrid>
+			    		     								
+				</s:BorderContainer>
+			</s:BorderContainer>
+		</s:NavigatorContent>
+		
+	</mx:ViewStack>		
+	
+</mx:TitleWindow>

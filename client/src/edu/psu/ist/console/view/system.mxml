@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:NavigatorContent label="System Console"
+		 			xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 			xmlns:s="library://ns.adobe.com/flex/spark"
+		 			xmlns:mx="library://ns.adobe.com/flex/mx"
+					xmlns:net="flash.net.*"
+					width="100%" height="100%" 
+					creationComplete="initView();">
+	<s:layout>
+		<s:VerticalLayout />
+	</s:layout>
+	
+
+	<fx:Script>
+        <![CDATA[
+			import com.pnwrain.easyCG.model.ModelFactory;
+			
+			import edu.psu.ist.console.model.*;
+			import edu.psu.ist.console.value.MessageVO;
+			import edu.psu.ist.console.value.TimelineVO;
+			import edu.psu.ist.neocities.model.ScoreModel;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+           
+            [Bindable]
+            public var mModel : MessageModel = ModelFactory.getModel("MessageModel") as MessageModel;
+			
+			
+            private var filterBy : ArrayCollection = new ArrayCollection();
+            
+            private function initView() : void {
+            	formatList();
+            	//default
+            }
+
+            private function autoScrollTextArea():void {
+                console.validateNow();
+                console.verticalScrollPosition = console.maxVerticalScrollPosition;                
+            }
+	            
+            private function clearLogs() : void {
+            	mModel.clear();
+            }
+            
+            public function formatList() : void {
+            	filterBy = new ArrayCollection();
+            	
+            	if (misc.selected) { filterBy.addItem("Misc"); }
+            	if (resource.selected) { filterBy.addItem("Resource"); }
+            	if (score.selected) { filterBy.addItem("Score"); }
+            	if (answer.selected) { filterBy.addItem("Answer"); }
+            	if (ds.selected) { filterBy.addItem("BlazeDS"); }
+            	if (msg.selected) { filterBy.addItem("Confirmation"); }
+            	if (error.selected) { filterBy.addItem("ERROR"); }
+            	
+            	
+            	mModel.toggleFilter(filterBy);
+            }
+            
+            private function selectAll() : void {
+            	misc.selected=true;
+            	resource.selected=true;
+            	score.selected = true;
+            	answer.selected = true;
+            	ds.selected = true;
+            	msg.selected = true;
+            	error.selected = true;
+            	
+            	formatList();
+            }
+            
+            public function copyToClipBoard() : void
+            {
+            	var copy : String = "";
+            	
+            	copy += "Time" + "\t";
+            	copy += "Message Type" + "\t";
+            	copy += "Message" + "\n";
+            	
+            	
+            	
+            	var formatString : String = "HH:MM:SS";
+            	
+            	
+            	for each (var item : MessageVO in mModel.messageArray)
+            	{
+            		copy += item.date.hours.toString() + ":" + item.date.minutes.toString() + ":" + 
+            				item.date.seconds.toString() + ":" + item.date.milliseconds.toString() + "\t";
+            		copy += item.msgType + "\t";
+            		copy += item.msgText + "\n";
+            			
+            	}
+            	
+            	System.setClipboard(copy);            	
+            }
+			
+			public function saveData(event:CloseEvent) : void
+			{
+				
+				var hModel : HistoryModel = ModelFactory.getModel("HistoryModel") as HistoryModel;
+				var sModel : ScenarioModel = ModelFactory.getModel("ScenarioModel") as ScenarioModel;
+				var cModel :ChatModel = ModelFactory.getModel("ChatModel") as ChatModel;
+				//var tModel :TimelineModel = ModelFactory.getModel("TimelineModel") as TimelineModel;
+				var scoreModel : ScoreModel = ModelFactory.getModel("ScoreModel") as ScoreModel;
+				var sessionModel :SessionModel = ModelFactory.getModel("SessionModel") as SessionModel;
+				
+				
+				var fileName : String = sModel.activeScenarioName + "-" + sModel.activeEnvironmentName + "-"
+										+ sessionModel.sessionInfo.date + "-" 
+										+ sessionModel.sessionInfo.startTime.replace(":", " ") + "-Team "
+										+ sessionModel.sessionInfo.teamID + ".csv";
+				
+				var data : String;
+				var actionHistory : String = hModel.getActionHistoryVO();
+		//		var orderHistory : String = hModel.getOrderHistoryVO();
+				var chatLog : String = cModel.getChatModel();
+				var eventHistory : String = hModel.getEventHistory();
+				var score : String = scoreModel.getScoreModel();
+				var questionHistory : String = hModel.getQuestionHistory();
+				//var timeline : String = tModel.getTimelineModel();
+				
+				data = "Table:,Session Info\n";
+				data += "Researcher:," + sessionModel.sessionInfo.researcher + "\n";
+				data += "Participant ID:," + sessionModel.sessionInfo.teamID + "\n";
+				data += "Scenario:," + sModel.activeScenarioName + "\n";
+				data += "Condition:," + sModel.activeEnvironmentName+ "\n";
+				data += "Date:," + sessionModel.sessionInfo.date + "\n";
+				data += "Session Start Time:," + sessionModel.sessionInfo.startTime + "\n";
+				data += "Time (scenario end):," + timeOnly.format(new Date()) + "\n";
+				data += "Server:," + ExternalInterface.call("window.location.href.toString")+"\nXXXXXXXXXX\n\n";
+				
+				
+				data += "Table:,Action History\n"
+				if (actionHistory != ""){data += actionHistory; }
+				else { data+= "VOID: No Action History for this scenario\n"; }
+				data += "XXXXXXXXXX\n"
+				
+				/*data += "\nTable:,Order History\n";		
+				if (orderHistory != "") { data+= orderHistory; }  
+				else { data+= "VOID: No Order History for this scenario\n"; }*/
+				data += "XXXXXXXXXX\n"
+				
+				data += "\nTable:,Event History\n";
+				if (eventHistory != "") {data+=eventHistory; }
+				else { data+= "VOID: No Event History for this scenario\n"; }
+				data += "XXXXXXXXXX\n"
+				
+				data += "\nTable:,Question History\n";
+				if (questionHistory != "") {data+=questionHistory; }
+				else { data += "VOID: No Question History for this scenario\n"; }
+				data += "XXXXXXXXXX\n"
+				
+				data += "\nTable:,Score Data\n";
+				if (score != "") { data+=score; }
+				else { data += "VOID: No Score data for this scenario\n"; } 
+				data += "XXXXXXXXXX\n"
+				
+				data+= "\nTable:,Chat Model \n";
+				if (chatLog != "") {data+=chatLog; }
+				else { data += "VOID: No chat log for this scenario\n"; } 
+				data += "XXXXXXXXXX\n"
+				
+				/*data+= "\nTable:,Timeline Model\n";
+				data+=timeline;
+				data += "XXXXXXXXXX\n";
+				data += "EOF\n\n\n\n";
+				data += mModel.toCSVString();*/
+				
+				
+				fileReference.save(data, fileName);
+				
+				if (mModel.errors)
+				{
+					Alert.show("There have been errors detected, please save the console file and pass it on to the head researcher"
+								,"Errors Detected", Alert.OK,null,this.saveConsole);
+				}
+			}
+			
+			public function saveConsole(event : CloseEvent) : void
+			{
+				var sModel : ScenarioModel = ModelFactory.getModel("ScenarioModel") as ScenarioModel;
+				var fileName : String = "ERRORfile-" + sModel.activeScenarioName + "-" + dateFormatter.format(new Date()) + ".csv";
+				
+				var data : String;
+				
+				data = "Scenario:," + sModel.activeScenario.label + "\n";
+				data += "Date:," + dateOnly.format(new Date()) + "\n";
+				data += "Time (scenario end):," + timeOnly.format(new Date()) + "\n";
+				data += "Server:," + ExternalInterface.call("window.location.href.toString")+"\n\n";
+				
+				data+= "NeoCITIES Console Data:\n\n";
+				data+= mModel.toCSVString();
+				
+				fileReference.save(data, fileName);
+			}
+
+        ]]>
+    </fx:Script>
+	
+	<fx:Declarations>
+		<mx:DateFormatter id="dateFormatter"
+						  formatString="MM-DD-YYYY (LL NN A)"
+						  />
+		<mx:DateFormatter id="dateOnly" formatString="MM-DD-YYYY" />
+		<mx:DateFormatter id="timeOnly" formatString="HH:NN:SS" />
+		<net:FileReference id="fileReference" />
+	</fx:Declarations>
+	
+    <mx:DataGrid id="console" 
+				 width="100%" height="100%" 
+				 dataProvider="{mModel.messageArray}"
+				 updateComplete="autoScrollTextArea()"
+				 focusIn="autoScrollTextArea()"
+				 variableRowHeight="true">
+    	<mx:columns>
+
+			<mx:DataGridColumn headerText="Time"
+					width="40"
+					textAlign="center">
+				<mx:itemRenderer>
+					<fx:Component>
+						
+						<mx:VBox>
+							<fx:Declarations>
+								<mx:DateFormatter id="dateFormat" formatString="HH:NN:SS" />
+							</fx:Declarations>
+							<mx:Label text = "{dateFormat.format(data.date)}" />
+						</mx:VBox>						<!-- formatDateTime.format(data.date) -->																		
+					</fx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn> 
+			
+			<mx:DataGridColumn headerText="Message Type" width="50" textAlign="center" 
+							   dataField="msgType"/>
+				
+			<mx:DataGridColumn headerText="Message" textAlign="left" width = "200"
+							   dataField="msgText" wordWrap="true" />				
+		</mx:columns>
+    </mx:DataGrid>
+	<s:HGroup width="100%">
+		<s:CheckBox id="misc" label="Misc" click="formatList();" selected="true"/>
+		<s:CheckBox id="resource" label="Resource Totals" click="formatList();"/>
+		<s:CheckBox id="score" label="Score Calcs" click="formatList();"/>
+		<s:CheckBox id="answer" label="Answer Checking" click="formatList();"/>
+		<s:CheckBox id="ds" label="BlazeDs" click="formatList();"/>
+		<s:CheckBox id="msg" label="Confirmations" click="formatList();"/>
+		<s:CheckBox id="error" label="Errors" click="formatList();"/>
+		<s:Button id="selAll" label="Select All" click="selectAll();" />
+		<s:Button label="Copy" click="copyToClipBoard()" />
+		<s:Button label="Save Data" click="this.saveData(null)" />
+	</s:HGroup>		
+</s:NavigatorContent>

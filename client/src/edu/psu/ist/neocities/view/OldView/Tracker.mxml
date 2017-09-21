@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Panel xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 xmlns:v="edu.psu.ist.neocities.view.*"
+		 width="100%" 
+	 	 height="100%" 
+	 	 title="Event Tracker" 
+		 creationComplete="initTracker()" xmlns:OldView="edu.psu.ist.neocities.view.OldView.*">
+		
+	<s:layout>
+		<s:VerticalLayout />
+	</s:layout>
+	
+	<fx:Script>
+		<![CDATA[
+			import edu.psu.ist.neocities.oldValue.IncidentVO;			
+			import edu.psu.ist.neocities.oldModel.IncidentModel;
+			import com.pnwrain.easyCG.model.ModelFactory;
+			import com.pnwrain.easyCG.events.ControlEvent;
+			import mx.collections.ArrayCollection;
+			import edu.psu.ist.neocities.component.PanelToolTip;
+    		import mx.events.ToolTipEvent;
+			import mx.controls.Alert;	
+			
+			[Bindable]
+			private var iModel : IncidentModel = ModelFactory.getModel('IncidentModel') as IncidentModel;		
+							
+			public function initTracker(): void {		
+				//this.resetSelection();	
+			}		
+												
+            private function launchInspector(incident : Object):void {
+               
+               if(incident != null){ // just in case
+	                var event : ControlEvent = new ControlEvent('evt_inspector');
+					event.data = incident;
+					trace("Tracker - request launching of InspectorPopup");
+					event.dispatch();
+               }
+               return void;
+            }
+            
+            private function selectIncident(item : Object):void {
+				var incident : IncidentVO = item as IncidentVO;
+               	
+           		iModel.selectedIncident = incident;   
+             	
+               	return void;
+            }
+            
+            private function centerMap(incident : Object):void {
+             
+               incident = incident as IncidentVO;
+               
+               if(incident != null){ // just in case
+	                var event : ControlEvent = new ControlEvent('evt_centerMap');
+					
+					event.data = incident;
+					trace("Tracker - centering the Map on the selected incident");
+										
+					setSelection(incident);
+					event.dispatch();
+					
+               }
+               return void;
+            }
+            
+            private function setSelection(incident : Object) : void
+            {
+            	
+            	var event2 : ControlEvent = new ControlEvent('evt_selectEvent');
+            	incident = incident as IncidentVO;
+            	
+            	if (incident != null)
+            	{     
+            		event2.data = incident.label;  
+      		   	}
+            	else
+            	{
+            		iModel.selectedIncident = null;
+            		event2.data = "No Incident Selected";
+            		
+            	}
+            	selectIncident(incident);
+            	
+            	event2.dispatch();
+            	//change="setSelection(openTrackerGrid.selectedItem)"
+            }
+            
+            public function resetSelection() : void
+            {            	
+            	setSelection(null);
+            	
+            }
+
+		]]>
+	</fx:Script>
+
+ <!--===============================================================================\
+   | U.I. Code
+ \================================================================================-->
+	<OldView:dispatchSmall width="100%" height="10%" id="smallDispatch" />
+    <mx:VDividedBox height="100%" width="100%">
+		<s:BorderContainer id="openBox" height="70%" width="100%" cornerRadius="0" borderWeight="2" borderStyle="solid" borderColor="#989B97">
+			<s:layout>
+				<s:VerticalLayout />
+			</s:layout>
+			
+			<s:Label text="Open Incidents:"  fontWeight="bold"/> 
+		    
+	        <mx:DataGrid id="openTrackerGrid" 
+	        	width="100%" height="100%" 
+	        	dataProvider="{iModel.openIncidents}"        	
+
+	        	itemClick="centerMap(openTrackerGrid.selectedItem)"
+	       	    doubleClickEnabled="true"        			 
+	        	itemDoubleClick="launchInspector(openTrackerGrid.selectedItem)"
+				
+	        	borderStyle="none"
+				dropEnabled="false"
+	        	sortableColumns="false"
+	        	draggableColumns="false"    	
+ 	        	>
+	        	<mx:columns>
+	        		<mx:DataGridColumn headerText="Dispatch" 
+	        			dataField="dispatchTime" 
+	        			width="27" 
+	        			textAlign="center" 
+	        			
+	        		/>
+					<!--itemRenderer="edu.psu.ist.neocities.component.trackerLabel"
+					dataField="label"-->
+					<mx:DataGridColumn headerText="Incident" 
+						textAlign="left" width="150"
+						itemRenderer="edu.psu.ist.neocities.component.OldComponent.trackerLabel"
+		    			/>
+					<!--itemRenderer="edu.psu.ist.neocities.component.eventStatus"-->
+	        		<mx:DataGridColumn headerText="Status "
+	        			dataField="status" 
+	        			width="32" 
+	        			textAlign="center" 
+						itemRenderer="edu.psu.ist.neocities.component.OldComponent.eventStatus"
+	        			 />        				
+	        	</mx:columns>
+	        </mx:DataGrid>
+	       </s:BorderContainer>
+	       
+	        <s:BorderContainer height="30%" width="100%" borderStyle="solid" borderWeight="2" borderColor="#989B97">
+				<s:layout>
+					<s:VerticalLayout />
+				</s:layout>
+				
+				<s:Label text="Closed Incidents:"  fontWeight="bold"/> 
+			    
+		        <mx:DataGrid id="closedTrackerGrid" 
+		        	width="100%" height="100%" 
+		        	dataProvider="{iModel.closedIncidents}"        	
+		        	selectable = "true"
+		        	borderStyle="none"
+		        	doubleClickEnabled="true"        			 
+		        	itemDoubleClick="launchInspector(openTrackerGrid.selectedItem)"
+		        	sortableColumns="false"
+		        	
+		        	draggableColumns="false"    
+		        	>
+		        	<mx:columns>
+		        		<mx:DataGridColumn headerText="End" 
+		        			dataField="completionTime" 
+		        			width="27" 
+		        			textAlign="center" 
+		        			/>
+		        			
+		        		<mx:DataGridColumn headerText="Incident" 
+			    			textAlign="left" width="150"
+			    			itemRenderer="edu.psu.ist.neocities.component.OldComponent.trackerLabel"
+							/>
+						
+		        	
+		        		<mx:DataGridColumn headerText="Status "
+		        			dataField="status" 
+		        			width="32" 
+		        			textAlign="center" 
+		        			itemRenderer="edu.psu.ist.neocities.component.OldComponent.eventStatus" />        				
+		        	</mx:columns>
+		        </mx:DataGrid>
+	        </s:BorderContainer>
+    </mx:VDividedBox>
+      	
+
+</s:Panel>

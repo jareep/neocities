@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Panel xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 xmlns:v="edu.psu.ist.neocities.view.*"
+		 width="600" 
+		 height="100%" 
+		 title="Location Tracker"
+		 creationComplete="initTracker()">
+	
+	<s:layout>
+		<s:VerticalLayout />
+	</s:layout>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.pnwrain.easyCG.events.ControlEvent;
+			import com.pnwrain.easyCG.model.ModelFactory;
+			
+			import edu.psu.ist.console.model.EventModel;
+			import edu.psu.ist.console.value.EventVO;
+			import edu.psu.ist.neocities.component.PanelToolTip;
+			import edu.psu.ist.neocities.model.InformationModel;
+			import edu.psu.ist.neocities.model.LocationModel;
+			import edu.psu.ist.neocities.value.LocationVO;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.ToolTipEvent;	
+			
+			[Bindable]
+			public var lModel : LocationModel = ModelFactory.getModel("LocationModel") as LocationModel;
+			
+			public function initTracker(): void {		
+				
+				
+			}
+			
+			public function setSelectedLocation (location : LocationVO) :  void
+			{
+				lModel.selectedLocation = location;
+				
+				var event :ControlEvent = new ControlEvent("evt_mc_updateinfo");
+				event.dispatch();
+				
+				var event2 : ControlEvent = new ControlEvent("evt_mc_clearSelectedInfo");
+				event2.dispatch();
+
+			}	
+			
+			
+			
+		]]>
+	</fx:Script>
+	
+	<!--===============================================================================\
+	| U.I. Code
+	\================================================================================-->
+
+
+	<s:BorderContainer id="openBox" height="100%" width="100%" cornerRadius="0" borderWeight="0" >
+		<s:layout>
+			<s:VerticalLayout />
+		</s:layout>
+		
+		<mx:DataGrid id="locationGrid" width="100%" height="100%" borderStyle="none"
+					 dataProvider="{lModel.data}" editable="false"
+					 itemClick="{setSelectedLocation(locationGrid.selectedItem as LocationVO)}"
+					 showHeaders="true" variableRowHeight="true" verticalAlign="middle"
+					 verticalGridLines="true" wordWrap="true">
+			<mx:columns>
+			
+				<mx:DataGridColumn width=".20" dataField="numInformation" headerText="Activity"
+								   itemRenderer="edu.psu.ist.neocities.component.locationStatus"
+								   sortable="true" textAlign="center"/>
+				
+				<mx:DataGridColumn width=".75" headerText="Location"
+								   itemRenderer="edu.psu.ist.neocities.component.locationLabel"
+								   resizable="true" sortable="true" textAlign="center"/>
+				
+				
+				
+				
+			</mx:columns>
+			
+		</mx:DataGrid>
+		
+	</s:BorderContainer>
+	
+</s:Panel>

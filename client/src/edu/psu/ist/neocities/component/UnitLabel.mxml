@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:MXDataGridItemRenderer xmlns:mx="library://ns.adobe.com/flex/mx" 
+						  xmlns:fx="http://ns.adobe.com/mxml/2009"
+						  xmlns:s="library://ns.adobe.com/flex/spark" width="100%" creationComplete="creationCompleteHandler(data as ResourceVO)"  >
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.pnwrain.easyCG.model.ModelFactory;
+			
+			import edu.psu.ist.neocities.model.ResourceModel;
+			import edu.psu.ist.neocities.value.ResourceVO;
+			
+			import mx.events.FlexEvent;
+			
+		
+			
+			protected function creationCompleteHandler(resource :ResourceVO):void
+			{
+				// TODO Auto-generated method stub
+				if (resource.icon == null || resource.icon == "")
+				{
+					this.removeChild(image);
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	<s:HGroup paddingLeft="1" verticalAlign="middle">
+		<mx:Image id="image" autoLoad = "true" source="{(data as ResourceVO).icon}"/>
+		<s:Label text="{(data as ResourceVO).label}"  />
+	</s:HGroup>
+	
+	
+</s:MXDataGridItemRenderer>

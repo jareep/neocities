@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:NavigatorContent	label="Question History"
+					xmlns:fx="http://ns.adobe.com/mxml/2009"
+					xmlns:s="library://ns.adobe.com/flex/spark"
+					xmlns:mx="library://ns.adobe.com/flex/mx"
+					xmlns:util="edu.psu.ist.neocities.util.*" 
+					width="100%" height="100%"
+					creationComplete="initView();">
+	<s:layout>
+		<s:VerticalLayout />
+	</s:layout>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.pnwrain.easyCG.model.ModelFactory;
+			
+			import edu.psu.ist.console.model.HistoryModel;
+			import edu.psu.ist.console.value.ActionHistoryVO;
+			import edu.psu.ist.console.value.QuestionHistoryVO;
+			import edu.psu.ist.neocities.oldModel.IncidentModel;
+			import edu.psu.ist.neocities.oldModel.ResourceModel;
+			import edu.psu.ist.neocities.model.RoleModel;
+			import edu.psu.ist.neocities.oldModel.UnitModel;
+			import edu.psu.ist.neocities.oldValue.IncidentVO;
+			import edu.psu.ist.neocities.value.ResourceVO;
+			import edu.psu.ist.neocities.value.RoleVO;
+			import edu.psu.ist.neocities.value.UnitVO;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.controls.dataGridClasses.DataGridColumn;
+			import mx.formatters.NumberBase;
+			
+			[Bindable]
+			public var hModel : HistoryModel = ModelFactory.getModel("HistoryModel") as HistoryModel;
+			
+			[Bindable]
+			public var uModel : UnitModel = ModelFactory.getModel("UnitModel") as UnitModel;
+			
+			[Bindable]
+			public var rModel : ResourceModel = ModelFactory.getModel("ResourceModel") as ResourceModel;
+			
+			[Bindable]
+			public var iModel : IncidentModel = ModelFactory.getModel("IncidentModel") as IncidentModel;    
+			
+			[Bindable]
+			public var pModel : RoleModel = ModelFactory.getModel("RoleModel") as RoleModel;
+			
+			private function initView() : void {
+				
+			}
+			
+
+			private function formatRoleName(item : Object, col:DataGridColumn) : String
+			{
+				var questionHistory : QuestionHistoryVO = item as QuestionHistoryVO;
+				
+				
+				
+				return getRoleName(questionHistory.roleID);
+			}
+			
+			private function formatReactionTime(item : Object, col:DataGridColumn) : String
+			{
+				var questionHistory : QuestionHistoryVO = item as QuestionHistoryVO;
+				
+				
+				
+				return (questionHistory.answerTime - questionHistory.questionTime).toString();
+			}
+			
+			private function getRoleName (id : int) : String
+			{
+				var role : RoleVO = pModel.getPlayer(id);
+				
+				return role.role
+			}
+			
+			
+			private function autoScrollTextArea():void {
+				questions.validateNow();
+				questions.verticalScrollPosition = questions.maxVerticalScrollPosition;                
+			}
+			
+			private function copyToClipBoard() : void 
+			{
+				var copy : String = "";
+		
+				
+				System.setClipboard(copy);
+				
+			}          
+		]]>
+	</fx:Script>
+	
+	<mx:DataGrid id="questions" 
+				 
+				 width="100%" height="100%" 
+				 dataProvider="{hModel.questionHistory}"
+				 updateComplete="autoScrollTextArea()"
+				 horizontalScrollPolicy="auto"
+				 sortableColumns="false"
+				 
+				 focusIn="autoScrollTextArea()">
+		<mx:columns>
+			<mx:DataGridColumn headerText="Question Id"
+							   dataField="questionId"
+							   textAlign="center" 
+							  />
+			<mx:DataGridColumn headerText="Answer Value"
+							   dataField="answerValue"
+							   textAlign="center" 
+							  />
+			<mx:DataGridColumn headerText="Correct"
+							   dataField="correct"
+							   textAlign="center"
+							   />
+			
+			<mx:DataGridColumn headerText="Role"
+							   dataField="roleID" 
+							   textAlign="center" 
+							   labelFunction="formatRoleName"
+							  />
+			
+			<mx:DataGridColumn 	headerText="Question Time"
+								dataField="questionTime"	
+								
+								textAlign="center"/>
+			
+			<mx:DataGridColumn headerText="Answer Time"
+							   dataField="answerTime"
+							   textAlign="center" 
+							   />
+			
+			<mx:DataGridColumn headerText="Reaction Time"
+							   labelFunction="formatReactionTime"
+							   textAlign="center" 
+							  />
+			
+			<mx:DataGridColumn headerText="Total Utterances"
+							   dataField="totalUtterances"
+							   textAlign="center"
+							   width="100" />
+			
+			<mx:DataGridColumn headerText="Total Characters"
+							   dataField="totalCharacters"
+							   textAlign="center"
+							   width="100" />
+			
+			<mx:DataGridColumn headerText="Total Words"
+							   dataField="totalWords"
+							   textAlign="center"
+							   width="100" />
+			
+			<mx:DataGridColumn headerText="Role Utterances"
+							   dataField="roleUtterances"
+							   textAlign="center"
+							   width="100" />
+			
+			<mx:DataGridColumn headerText="Role Characters"
+							   dataField="roleCharacters"
+							   textAlign="center"
+							   width="100" />
+			
+			<mx:DataGridColumn headerText="Role Words"
+							   dataField="roleWords"
+							   textAlign="center"
+							   width="100" />
+			
+		</mx:columns>
+	
+	
+	</mx:DataGrid>
+	<s:Button label="Copy to ClipBoard" click="copyToClipBoard()" />
+</s:NavigatorContent>
+

@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Panel
+	xmlns:fx="http://ns.adobe.com/mxml/2009"
+	xmlns:s="library://ns.adobe.com/flex/spark"
+	xmlns:mx="library://ns.adobe.com/flex/mx"
+	
+	width="100%" 
+	height="100%" 
+	title="Master Event Tracker" 
+	creationComplete="initTracker()">
+	<s:layout>
+		<s:VerticalLayout />
+	</s:layout>
+	
+	<fx:Script>
+		<![CDATA[
+			import edu.psu.ist.neocities.oldValue.IncidentVO;			
+			import edu.psu.ist.neocities.oldModel.IncidentModel;
+			import com.pnwrain.easyCG.model.ModelFactory;
+			import com.pnwrain.easyCG.events.ControlEvent;
+			import mx.collections.ArrayCollection;		
+			
+			import mx.controls.Alert;	
+			
+			[Bindable]
+			private var iModel : IncidentModel = ModelFactory.getModel('IncidentModel') as IncidentModel;		
+							
+			public function initTracker(): void {		
+				//this.resetSelection();	
+										
+
+			}		
+												
+            private function launchInspector(incident : Object):void {
+               
+               if(incident != null){ // just in case
+	                var event : ControlEvent = new ControlEvent('evt_inspector');
+					event.data = incident;
+					trace("Tracker - request launching of InspectorPopup");
+					event.dispatch();
+               }
+               return void;
+            }
+            
+            private function selectIncident(item : Object):void {
+				var incident : IncidentVO = item as IncidentVO;
+               	
+           		iModel.selectedIncident = incident;   
+             	
+               	return void;
+            }
+            
+            private function centerMap(incident : Object):void {
+               
+                              
+               incident = incident as IncidentVO;
+               
+               if(incident != null){ // just in case
+	                var event : ControlEvent = new ControlEvent('evt_centerMap');
+					
+					event.data = incident;
+					trace("Tracker - centering the Map on the selected incident");
+										
+					setSelection(incident);
+					event.dispatch();
+					
+               }
+               return void;
+            }
+            
+            private function setSelection(incident : Object) : void
+            {
+            	
+            	var event2 : ControlEvent = new ControlEvent('evt_selectEvent');
+            	incident = incident as IncidentVO;
+            	
+            	if (incident != null)
+            	{     
+            		event2.data = incident.label;  
+      		   	}
+            	else
+            	{
+            		iModel.selectedIncident = null;
+            		event2.data = "No Incident Selected";
+            		
+            	}
+            	selectIncident(incident);
+            	
+            	event2.dispatch();
+            	//change="setSelection(openTrackerGrid.selectedItem)"
+            }
+            
+            private function resetSelection() : void
+            {            	
+            
+           		setSelection(null);
+            }
+           								
+		]]>
+	</fx:Script>
+
+
+ <!--===============================================================================\
+   | U.I. Code
+ \================================================================================-->
+	 
+	<mx:VBox label="Master Event Tracker" width="100%" height="100%">
+	    
+    <mx:DataGrid id="openTrackerGrid" 
+    	width="100%" height="100%" 
+    	dataProvider="{iModel.data}"        	
+    	doubleClickEnabled="true"
+    	itemClick="centerMap(openTrackerGrid.selectedItem)"
+    			 
+    	itemDoubleClick="launchInspector(openTrackerGrid.selectedItem)"	    
+     	>
+    	<mx:columns>
+    		<mx:DataGridColumn headerText="Dispatch" 
+    			dataField="dispatchTime" 
+    			width="30" 
+    			textAlign="center" 
+    			 
+    		/>
+    		<mx:DataGridColumn headerText="Symbol" 
+    			dataField="icon" 
+    			width="30" 
+    			textAlign="center"
+    			>
+    			<mx:itemRenderer>
+    				<fx:Component>
+    					<mx:Image source="edu/psu/ist/neocities/assets/event_icons_small/{data.icon}" height="20" horizontalAlign="center" />								               
+    				</fx:Component>
+    			</mx:itemRenderer>		
+    		</mx:DataGridColumn>
+    		<mx:DataGridColumn headerText="Event Label " 
+    			dataField="label" 
+    			width="100" 
+    			textAlign="left" 
+    			wordWrap="true"
+    			/>  
+    		<mx:DataGridColumn headerText="Status "
+    			dataField="status" 
+    			width="32" 
+    			textAlign="center" 
+    			itemRenderer="edu.psu.ist.neocities.component.OldComponent.eventStatus" />        				
+    	</mx:columns>
+    </mx:DataGrid>
+    
+    </mx:VBox>
+     
+</s:Panel>

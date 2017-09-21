@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:MXDataGridItemRenderer xmlns:mx="library://ns.adobe.com/flex/mx" 
+				xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 		xmlns:s="library://ns.adobe.com/flex/spark" width="100%"  >
+	
+<fx:Script>
+	<![CDATA[	
+		import com.hurlant.util.der.Integer;
+		import com.pnwrain.easyCG.events.ControlEvent;
+		import com.pnwrain.easyCG.model.ModelFactory;
+		
+		import edu.psu.ist.neocities.component.PanelToolTip;
+		import edu.psu.ist.neocities.model.ImageModel;
+		import edu.psu.ist.neocities.oldModel.IncidentModel;
+		import edu.psu.ist.neocities.oldModel.ResourceModel;
+		import edu.psu.ist.neocities.model.RoleModel;
+		import edu.psu.ist.neocities.oldValue.IncidentVO;
+		import edu.psu.ist.neocities.value.ResourceVO;
+		import edu.psu.ist.neocities.value.RoleVO;
+		import edu.psu.ist.neocities.value.UnitVO;
+		
+		import mx.collections.ArrayCollection;
+		import mx.controls.Alert;
+		import mx.core.DragSource;
+		import mx.core.IToolTip;
+		import mx.controls.ToolTip;
+		import mx.events.DragEvent;
+		import mx.events.ToolTipEvent;
+		import mx.managers.DragManager;
+		import mx.managers.ToolTipManager;
+		
+		import spark.components.BorderContainer;
+		
+		
+		
+
+						
+	[Bindable]
+   	private var imageModel : ImageModel = ModelFactory.getModel("ImageModel") as ImageModel;
+	                
+	[Bindable]
+   	private var iModel : IncidentModel = ModelFactory.getModel("IncidentModel") as IncidentModel;
+		
+	[Bindable]
+	private var reModel : ResourceModel = ModelFactory.getModel("ResourceModel") as ResourceModel;
+   	
+   	[Bindable]
+   	private var rModel : RoleModel = ModelFactory.getModel("RoleModel") as RoleModel;
+		
+	private var tt:ToolTip;
+   	
+   	private function getIcon( incidentID : String ) : Class {
+   		var incident : IncidentVO = iModel.getIncident(incidentID);
+   		
+   		
+   		return imageModel.getSmallIncidentIcon(incident.icon);
+   	}
+   	
+   	private function getDescription( incidentID : String ) : String {
+   		var incident : IncidentVO = iModel.getIncident(incidentID);
+   		
+   		return incident.getDescription(int(rModel.currentPlayer.roleID));
+   	}
+		
+	private function getDispatchDescription (incidentID : String) : String {
+		var incident : IncidentVO = iModel.getIncident(incidentID);
+		
+		return "Dispatch to " + incident.label;
+	}
+   	
+   	private function getLabel( incidentID : String ) : String {
+   		var incident : IncidentVO = iModel.getIncident(incidentID);
+   		
+   		return incident.label;
+   	}
+   	
+   	private function createCustomTip(incidentID : String, event:ToolTipEvent) : void {
+       var ptt:PanelToolTip = new PanelToolTip();
+      	   ptt.title = this.getLabel(incidentID);
+           
+		
+       if (DragManager.isDragging)
+	   {
+		   ptt.bodyText = this.getDispatchDescription(incidentID) + " " + event.type;
+	   }
+	   else
+	   {
+		   ptt.bodyText = this.getDescription(incidentID);
+	   }
+		
+	   event.toolTip = ptt;
+		 
+         
+    }
+	          
+		import mx.core.IUIComponent;
+		private function dragEnterHandler(e:DragEvent):void {
+			var test:IUIComponent = e.currentTarget as IUIComponent;
+			var ds :DragSource = e.dragSource;
+			
+			var toolTip : String;
+			
+			DragManager.acceptDragDrop(test);
+			
+			if (ds.hasFormat("UnitVO"))
+			{
+				/*
+				dropShadowVisible="true" borderVisible="true"
+				borderColor="black"
+				alpha="1" width="250" 
+				title="feh" contentBackgroundAlpha="5" backgroundColor="0xCCCCCC"
+				*/
+				var unit : UnitVO = ds.dataForFormat("UnitVO") as UnitVO;
+				var resource : ResourceVO = reModel.getResource(unit.resourceID.toString());
+				
+				toolTip = "Dispatch " + resource.label + " to " + data.label;	
+			}
+			else
+			{
+				toolTip = "You cannot dispatch that";
+			}
+			tt = ToolTipManager.createToolTip(toolTip, e.stageX, e.stageY) as ToolTip;
+			
+			tt.setStyle("backgroundColor", 0xCCCCCC);
+			tt.setStyle("borderColor" , 0xFFFFFF);
+			tt.setStyle("dropShadowVisible", "true");
+			tt.setStyle("borderVisible", "true");
+			tt.setStyle("contentBackgroundAlpha", "5");
+			tt.setStyle("alpha", "1");
+			
+			
+		}
+		
+		
+		private function dragDropHandler(e:DragEvent):void {
+			var ds :DragSource = e.dragSource;
+			
+			if (ds.hasFormat("UnitVO"))
+			{
+				var unit : UnitVO = ds.dataForFormat("UnitVO") as UnitVO;
+				var dispatch :ArrayCollection = new ArrayCollection();
+				
+				dispatch.addItem(unit);
+								
+				iModel.selectedIncident = data as IncidentVO;
+				
+				var dispatchEvent : ControlEvent = new ControlEvent('evt_dispatch');
+				dispatchEvent.data = dispatch;
+				dispatchEvent.dispatch();
+				
+			}
+			this.dragExitHandler(null);
+			
+		}
+
+
+		protected function dragExitHandler(event:DragEvent):void
+		{
+			if (tt)
+			{
+				ToolTipManager.destroyToolTip(tt);
+				tt = null;
+			}
+		}
+
+	]]>
+</fx:Script>
+	<!--verticalAlign="middle"-->
+	
+	<s:HGroup textAlign="center"  toolTip=" " toolTipCreate="createCustomTip(data.incidentID, event)" 
+			  width="100%"
+			  dragExit="dragExitHandler(event)"
+			  dragEnter="dragEnterHandler(event);"
+			  dragDrop="dragDropHandler(event);"
+			  >	
+		
+			<mx:Image source="edu/psu/ist/neocities/assets/event_icons_small/{data.icon}" height="20" horizontalAlign="center" />
+			<s:Label 
+				text="{getLabel(data.incidentID)}"
+				toolTipCreate="createCustomTip( data.incidentID, event)"
+				color="#000000"
+				/> 
+		
+	</s:HGroup>
+		
+		
+
+</s:MXDataGridItemRenderer>

@@ -1,0 +1,71 @@
+@namespace s "library://ns.adobe.com/flex/spark";
+@namespace mx "library://ns.adobe.com/flex/halo";
+
+s|Application{
+	/*
+    borderSkin:                   ClassReference("assets.RepeatedBackground");
+    background-image:             Embed("NC2IFBackground.PNG");
+    */
+}
+
+s|Accordion
+{
+    backgroundColor: #FFFFFF;
+    borderStyle: "solid";    
+    textAlign: "right"; 
+    
+}
+        
+/*
+//------------------------------
+//  AccordionHeader
+//------------------------------
+*/
+
+s|AccordionHeader
+{
+/*    selectedFillColors: #FFFFFF, #FFFFFF; */ /* overrides the calculated fillcolors */
+    
+/*    disabledIcon: null; */
+    disabledSkin: ClassReference("mx.skins.halo.AccordionHeaderSkin");
+/*    downIcon: null; */
+    downSkin: ClassReference("mx.skins.halo.AccordionHeaderSkin");
+    horizontalGap: 5;
+/*    overIcon: null; */
+    overSkin: ClassReference("mx.skins.halo.AccordionHeaderSkin");
+    paddingTop: 5;
+    paddingBottom: 5;
+/*    selectedDisabledIcon: null; */
+    selectedDisabledSkin: ClassReference("mx.skins.halo.AccordionHeaderSkin");
+/*    selectedDownIcon: null; */
+    selectedDownSkin: ClassReference("mx.skins.halo.AccordionHeaderSkin");
+/*    selectedOverIcon: null; */
+    selectedOverSkin: ClassReference("mx.skins.halo.AccordionHeaderSkin");
+/*    selectedUpIcon: null; */
+    selectedUpSkin: ClassReference("mx.skins.halo.AccordionHeaderSkin");
+    
+/*    upIcon: null; */
+    upSkin: ClassReference("mx.skins.halo.AccordionHeaderSkin");
+    
+    fontFamily: Arial;
+    fontWeight:bold;
+    fontSize:11;
+    fontSharpness:-200;
+    fontThickness:-100;
+    fontGridFitType: none;
+   
+}
+        
+s|Panel
+{
+	backgroundAlpha: 1.0;
+	borderAlpha: .7;
+	horizontalAlign: center;
+	verticalAlign: middle;
+}
+s|global
+{
+	content-background-color: #ffffff;
+	chrome-color: #CFCECE;
+	font-weight: normal;
+}

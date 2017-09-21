@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:MXDataGridItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+						  xmlns:s="library://ns.adobe.com/flex/spark" 
+						  xmlns:mx="library://ns.adobe.com/flex/mx" 
+						  focusEnabled="true" width="100%">
+		
+	<fx:Script>
+		<![CDATA[
+			import com.pnwrain.easyCG.events.ControlEvent;
+			import com.pnwrain.easyCG.model.ModelFactory;
+			
+			import edu.psu.ist.neocities.model.ImageModel;
+			import edu.psu.ist.neocities.model.IncidentModel;
+			import edu.psu.ist.neocities.value.IncidentVO;
+			
+			import mx.controls.Alert;						
+			
+			[Bindable]
+			private var imageModel : ImageModel = ModelFactory.getModel("ImageModel") as ImageModel;
+			
+			[Bindable]
+			private var iModel : IncidentModel = ModelFactory.getModel("IncidentModel") as IncidentModel;
+			
+			private function getIcon( incidentID : String ) : Class {
+				var incident : IncidentVO = iModel.getIncident(incidentID);
+		
+				return imageModel.getIncidentIcon(incident.icon);
+			}
+			
+			private function getLabel( incidentID : String ) : String {
+				var incident : IncidentVO = iModel.getIncident(incidentID);
+	
+				return incident.label;
+			}
+			
+			private function launchInspector(incidentID : String):void {
+				var incident : IncidentVO = iModel.getIncident(incidentID);
+				
+				if(incident != null){ // just in case
+					var event : ControlEvent = new ControlEvent('evt_inspector');
+					event.data = incident;
+					trace("Player Units - request launching of InspectorPopup");
+					event.dispatch();
+				}
+				return void;
+			}       
+			
+		]]>
+	</fx:Script>
+	
+	<s:HGroup width="100%"  doubleClick="{Alert.show(data.label)}" toolTip="Double click to launch the incident inspector!">
+		<mx:Image source="edu/psu/ist/neocities/assets/event_icons_small/{data.icon}" height="30" />
+		<s:Label text="{data.label}" />
+		<!--
+		<mx:LinkButton icon = "{imageModel.getIncidentIcon(data.icon)}"
+					   label="{data.label}"
+					   click="launchInspector(data.incidentID);"
+					   toolTip="Click the Icon to Launch the Incident Inspector!"
+					   enabled="true" 
+					   disabledColor="#000000" color="#000000"
+					   height="10" width="100%"  
+					   id = "linkbutton"
+					   />-->
+	</s:HGroup>
+</s:MXDataGridItemRenderer>

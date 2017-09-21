@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:MXDataGridItemRenderer xmlns:mx="library://ns.adobe.com/flex/mx"
+						  xmlns:fx="http://ns.adobe.com/mxml/2009"
+						  xmlns:s="library://ns.adobe.com/flex/spark" width="100%" height="100%"
+						  
+						  creationComplete="init()"   >
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:SparkSkin id="test">
+		<s:Rect left="2" right="2" top="2" bottom="2" >
+			<s:fill>
+				<s:SolidColor color="0xFFB61F" />
+			</s:fill>
+		</s:Rect>
+	</s:SparkSkin>
+	
+	
+	<fx:Script>
+		<![CDATA[
+			import com.pnwrain.easyCG.model.ModelFactory;
+			
+			import edu.psu.ist.neocities.model.InformationModel;
+			import edu.psu.ist.neocities.model.LocationModel;
+			import edu.psu.ist.neocities.value.LocationVO;
+			import edu.psu.ist.neocities.value.UnitVO;
+			
+			import mx.binding.utils.BindingUtils;
+			import mx.controls.Alert;
+			
+			[Bindable]
+			private var lModel : LocationModel = ModelFactory.getModel("LocationModel") as LocationModel;
+			
+			[Bindable]
+			public var iModel :InformationModel = ModelFactory.getModel("InformationModel") as InformationModel;
+			
+			
+			
+			private function locationLabelFunction(locID :int):String {
+				
+				return (lModel.getLocation(locID)).label;
+			}
+			
+			private function locationImageFunction(item :Object) :String {
+				return lModel.getLocation((item as LocationVO).id).getIcon();
+			}
+			
+			private function init() : void
+			{
+				/*BindingUtils.bindSetter(setProgress, (data as LocationVO), "avgSeverity");
+				BindingUtils.bindSetter(setProgress, (data as LocationVO), "numInformation");
+				BindingUtils.bindSetter(setProgress, iModel.data, "length");*/
+				
+			}
+			
+			private function setProgress(test : int) : void
+			{
+				/*var color : String;
+				var infoRatio : Number = (data as LocationVO).numInformation/(iModel.numInfo);
+				
+				if (infoRatio > 1) { infoRatio = 0.99; }
+				if (iModel.numInfo == 0) { infoRatio = 0; }
+				
+				var eventRatio : Number = (data as LocationVO).avgSeverity;	// change to average sevarity
+				
+				activity.setProgress(infoRatio,1);
+				
+				
+				if (eventRatio <= 4) { color = "0x38A438"; }
+				else if (eventRatio > 4 && eventRatio < 6) { color = "0xF6E422"; }
+				else if (eventRatio >= 6) { color = "0xEB470C"; }
+				
+				activity.setStyle("chromeColor", color);*/				
+			}
+			
+			override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number) : void{
+				
+				super.updateDisplayList(unscaledWidth, unscaledHeight);
+				
+				//setProgress(-1);
+				
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:HGroup  horizontalAlign="left" height="100%" width="100%" paddingTop="0" paddingBottom="0" paddingLeft="1" gap="3" >
+		<mx:Image height="100%" autoLoad = "true" source="{(data as LocationVO).getIcon()}" />
+		<s:VGroup  horizontalAlign="left" gap="0" verticalAlign="middle" width="100%" height="100%">	
+			<mx:Label fontWeight="bold" text="{(data as LocationVO).name}"/> 
+			<!--<mx:ProgressBar id = "activity" height="10" indeterminate="false" 
+							labelPlacement="center" labelWidth="0" maximum="1" minimum="0" mode="manual"
+							source="{(data as LocationVO).avgSeverity}" />-->
+			
+		</s:VGroup>	
+	</s:HGroup>
+	
+			
+		
+	
+	
+</s:MXDataGridItemRenderer>

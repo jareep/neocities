@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:MXDataGridItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		   xmlns:s="library://ns.adobe.com/flex/spark" 
+		   xmlns:mx="library://ns.adobe.com/flex/mx">
+	
+	<s:layout>
+		<s:VerticalLayout />
+	</s:layout>
+	
+	<fx:Style>
+		@namespace s "library://ns.adobe.com/flex/spark";
+		@namespace mx "library://ns.adobe.com/flex/mx";
+		
+		.scrollOff {
+			verticalScrollPolicy: off;
+			horizontalScrollPolicy: off;
+		}
+		
+		.hiddenAxis {
+			minorTickPlacement:none;
+			tickPlacement:none;
+		}
+		.scoreSeries {
+			fontSize:10;
+			fontWeight:bold;
+			labelPosition:inside;
+			labelAlign:right;
+		}
+	</fx:Style>
+	
+	<fx:Script>
+		<![CDATA[
+			
+			import mx.charts.HitData;
+			import mx.formatters.NumberBase;
+			import mx.charts.ChartItem;
+			import mx.charts.chartClasses.Series;
+			import mx.charts.series.items.BarSeriesItem;
+
+			import com.pnwrain.easyCG.model.ModelFactory;
+			
+			import edu.psu.ist.neocities.model.ScoreModel;
+			import edu.psu.ist.neocities.value.ScoreVO;
+			
+			[Bindable]
+			private var scoreModel : ScoreModel = ModelFactory.getModel("ScoreModel") as ScoreModel;   			   			
+			
+			[Bindable]
+			private var nb : NumberBase = new NumberBase();	
+			
+			public function scoreTip(hd:HitData):String {
+				return "Raw Score: " + nb.formatPrecision(hd.item.rawScore, 0) + " / " +  nb.formatPrecision(hd.item.worstScore, 0);
+			}
+			
+			private function scoreLabel(element:ChartItem, series:Series):String {
+				// Get a refereence to the current data element.
+				var data:BarSeriesItem  = BarSeriesItem (element);        
+				
+				// Get a reference to the current series.        
+				var currentSeries:BarSeries = BarSeries(series);
+				
+				// Create a return String and format the number.
+				return nb.formatPrecision(data.xNumber.toString(), 0);        
+			}
+		]]>
+	</fx:Script>
+
+		<mx:BarChart id="scoreChart" dataProvider="{data}" 
+			width="100%" height="100%"
+			showDataTips="true"
+			dataTipFunction="scoreTip"
+			>
+	       
+	        <mx:horizontalAxisRenderers>
+	        	<mx:AxisRenderer axis="{hAxis}" styleName="hiddenAxis" showLine="false" showLabels="false" />
+	        </mx:horizontalAxisRenderers>		
+	                
+	        <mx:horizontalAxis>
+	        	<mx:LinearAxis id="hAxis" maximum="{data.worstScore}" />
+	        </mx:horizontalAxis>
+	                
+	        <mx:verticalAxisRenderers>
+	        	<mx:AxisRenderer axis="{vAxis}" showLine="false" showLabels="false"  />
+	        </mx:verticalAxisRenderers>
+	        
+	        <mx:verticalAxis>
+	           <mx:CategoryAxis id="vAxis" categoryField="rawScore" />
+	        </mx:verticalAxis>
+	        
+	        <mx:series>
+	           <mx:BarSeries xField="rawScore" labelField="rawScore" styleName="scoreSeries" labelFunction="scoreLabel" />
+	        </mx:series>
+	        
+	     </mx:BarChart>
+	
+</s:MXDataGridItemRenderer>

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--<?xml version="1.0" encoding="utf-8"?><business:ServiceFactory xmlns="*" xmlns:business="com.pnwrain.easyCG.business.*" xmlns:mx="http://www.adobe.com/2006/mxml">-->
+<business:ServiceFactory xmlns="*" xmlns:business="com.pnwrain.easyCG.business.*"
+						 xmlns:fx="http://ns.adobe.com/mxml/2009" 
+						 xmlns:s="library://ns.adobe.com/flex/spark" 
+						 xmlns:mx="library://ns.adobe.com/flex/mx">
+
+<fx:Declarations>
+	<mx:RemoteObject id="neocitiesRO"
+		destination="neocitiesRO" />
+		
+	<mx:Consumer id="syncConsumer"
+		destination="sync-stream" 
+		channelConnect="trace(event)" 
+	    channelFault="trace(event)" 
+	    fault="trace(event)" />
+	
+	<mx:Consumer 
+	    id="neocitiesDS" 
+	    destination="neocitiesDS"  
+	    channelConnect="trace(event)" 
+	    channelFault="trace(event)" 
+	    fault="trace(event)" />
+	    
+	<mx:Consumer 
+	    id="unit" 
+	    destination="unit-stream"  
+	    channelConnect="trace(event)" 
+	    channelFault="trace(event)" 
+	    fault="trace(event)" />  
+	    
+	<mx:Consumer 
+	    id="time" 
+	    destination="time-stream"  
+	    channelConnect="trace(event)" 
+	    channelFault="trace(event)" 
+	    fault="trace(event)" />
+	    
+	<mx:Consumer 
+	    id="timeSync" 
+	    destination="timeSync-stream"  
+	    channelConnect="trace(event)" 
+	    channelFault="trace(event)" 
+	    fault="trace(event)" />        
+	    
+	<mx:Consumer 
+	    id="player" 
+	    destination="player-stream"  
+	    channelConnect="trace(event)" 
+	    channelFault="trace(event)" 
+	    fault="trace(event)" />
+	    
+	<mx:Consumer 
+	    id="pause" 
+	    destination="pause-stream"  
+	    channelConnect="trace(event)" 
+	    channelFault="trace(event)" 
+	    fault="trace(event)" />  
+		
+	<mx:Consumer 
+		id="question" 
+		destination="question-stream"  
+		channelConnect="trace(event)" 
+		channelFault="trace(event)" 
+		fault="trace(event)" />  
+	
+	<mx:Consumer 
+		id="locations" 
+		destination="location-stream"  
+		channelConnect="trace(event)" 
+		channelFault="trace(event)" 
+		fault="trace(event)" />  
+	
+	<mx:Consumer 
+	    id="score" 
+	    destination="score-stream"  
+	    channelConnect="trace(event)" 
+	    channelFault="trace(event)" 
+	    fault="trace(event)" />
+	
+	<mx:Consumer 
+	    id="info" 
+	    destination="info-stream"  
+	    channelConnect="trace(event)" 
+	    channelFault="trace(event)" 
+	    fault="trace(event)" /> 
+	
+	<mx:Consumer 
+		id="description" 
+		destination="description-stream"  
+		channelConnect="trace(event)" 
+		channelFault="trace(event)" 
+		fault="trace(event)" /> 
+	 
+	<mx:Consumer 
+	    id="orderHistory" 
+	    destination="oh-stream"  
+	    channelConnect="trace(event)" 
+	    channelFault="trace(event)" 
+	    fault="trace(event)" />
+</fx:Declarations>
+	         	        
+</business:ServiceFactory>

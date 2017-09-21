@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				autoDrawBackground="true"
+				rollOverColor="#FFFFFF">
+<fx:Script>
+		<![CDATA[
+			import edu.psu.ist.neocities.oldValue.IncidentVO;
+			import edu.psu.ist.neocities.value.RoleVO;
+			import edu.psu.ist.neocities.model.*;
+			import com.pnwrain.easyCG.model.ModelFactory;
+			import com.pnwrain.easyCG.events.ControlEvent;
+			import mx.collections.ArrayCollection;
+			import mx.controls.Image;
+			
+			[Bindable]
+			private var pModel : RoleModel = ModelFactory.getModel("RoleModel") as RoleModel;		
+			
+			
+			
+			[Bindable]
+			private var imageModel : ImageModel = ModelFactory.getModel("ImageModel") as ImageModel;
+			
+			public function initView(): void {				 											
+				
+			}
+			
+			public function getIncidentLabel( incidentID : String ) : String {
+				//var incident : IncidentVO = iModel.getIncident(incidentID);
+				
+				//return incident.label;
+				return "blah";
+			}
+			
+			public function getIncidentIcon( incidentID : String ) : Class {
+				/*var incident : IncidentVO = iModel.getIncident(incidentID);
+				
+				return imageModel.getIncidentIcon(incident.icon);*/
+				return new Class();
+			}
+			
+			public function getIncidentStatus( incidentID : String ) : String {
+				/*var incident : IncidentVO = iModel.getIncident(incidentID);
+				
+				return incident.status;*/
+				
+				return "blah";
+			}
+			
+			private function launchInspector(incidentID : String):void {
+				/*var incident : IncidentVO = iModel.getIncident(incidentID);
+				
+				if(incident != null){ // just in case
+					var event : ControlEvent = new ControlEvent('evt_inspector');
+					event.data = incident;
+					trace("Team - request launching of InspectorPopup");
+					event.dispatch();
+				}*/
+			}					
+			
+			
+		]]>
+	</fx:Script>
+	
+	<s:HGroup width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">					
+		<s:VGroup width="100%" height="100%">							
+			<mx:Image id="teamImage" source="{data.icon}"  click="initView()" />
+			
+			<mx:HBox width="100%" verticalAlign="middle" paddingTop="5" >
+				<mx:Repeater id="teamResourceList" dataProvider="{data.resources}">
+					<mx:Image source="{teamResourceList.currentItem.icon}" toolTip="{teamResourceList.currentItem.label}" />
+					<s:Label text="{teamResourceList.currentItem.available} / {teamResourceList.currentItem.total}" />					
+				</mx:Repeater>
+			</mx:HBox>
+		</s:VGroup>
+		<s:VGroup verticalAlign="middle" horizontalAlign="center" height="100%" width="100%" >
+			<s:Label text="Recent Event:"  fontWeight="bold"/>
+			
+			<mx:LinkButton icon = "{getIncidentIcon(data.incidentID)}"
+						   label="{getIncidentLabel(data.incidentID)}"
+						   labelPlacement="bottom"
+						   toolTip="{getIncidentStatus(data.incidentID)}"
+						   enabled="true"
+						   color="#000000" 
+						   disabledColor="#000000"					 	
+						   />
+		</s:VGroup>			
+	</s:HGroup> 				
+</s:ItemRenderer>

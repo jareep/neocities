@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<s:Panel xmlns:mx="library://ns.adobe.com/flex/mx" 
+		  xmlns:fx="http://ns.adobe.com/mxml/2009"
+		  xmlns:s="library://ns.adobe.com/flex/spark"
+		  width="100%"
+		  title="Dispatch Available Resources"	  
+		  height="100%">
+	
+	<!-- removed horizontalAlign="left" verticalAlign="middle" -->
+	<fx:Style>
+		@namespace mx "library://ns.adobe.com/flex/mx";
+		@namespace s "library://ns.adobe.com/flex/spark";
+		
+		.dList {
+			border-style:solid;
+			border-width:thick;
+			border-color:purple;
+		}
+		
+		.test {
+			color:purple;
+			font-size:30;
+			border-style:solid;
+			border-width:thick;
+		}
+		
+		.accHeader {
+			
+			fillAlphas: 0.5, 0.5;
+			selectedFillColors: #ff9900, white;
+		}
+	</fx:Style>
+	
+	<fx:Script>
+	  <![CDATA[
+	  	import mx.controls.DataGrid;
+	  	import edu.psu.ist.neocities.value.*;
+	    import edu.psu.ist.neocities.model.*;
+	  	
+	  	import com.pnwrain.easyCG.events.ControlEvent;
+	  	import com.pnwrain.easyCG.model.ModelFactory;
+	  	import mx.collections.ArrayCollection;
+	  	
+	  	import mx.controls.Alert;
+	  	
+	  	[Bindable]
+		private var iModel : IncidentModel = ModelFactory.getModel("IncidentModel") as IncidentModel;	  		
+	  	
+	  	[Bindable]
+		private var rModel : ResourceModel = ModelFactory.getModel("ResourceModel") as ResourceModel;
+		
+		[Bindable]				
+		private var pModel : RoleModel = ModelFactory.getModel("RoleModel") as RoleModel;
+		
+		[Bindable]
+		private var uModel : UnitModel = ModelFactory.getModel("UnitModel") as UnitModel;	
+		
+		private var selectedEvent : String;
+		
+		private var pendingUnits : ArrayCollection;			
+				  		
+	  	public function initView() : void {	  		
+	  		setSelectedEvent("no incident selected");
+	  		resetView();
+	  		
+	  			
+	  	}
+	  	
+	  	public function resetView() : void 
+	  	{
+	  		var index : int = dispatchAcc.selectedIndex;
+	  		uModel.resetUnits();
+	  		
+	  		rList.dataProvider = new Array();
+	  		rList.dataProvider = pModel.currentPlayer.resources;
+	  		
+	  		dispatchList.dataProvider = new ArrayCollection([]);
+	  		
+	  		enableDispatch('reset');
+	  		
+	  		dispatchAcc.selectedIndex = index;
+	  		//checkForResources("reset");
+	  	}
+	  	
+	  	public function updateResources() : void 
+	  	{
+	  		var index : int = dispatchAcc.selectedIndex;
+	  		//uModel.resetUnits();
+	  		
+	  		rList.dataProvider = new Array();
+	  		
+	  		rList.dataProvider = pModel.currentPlayer.resources;
+	  		 
+	  		if (iModel.selectedIncident.status.toLowerCase() == "completed" || iModel.selectedIncident.status.toLowerCase() == "failed")
+	  		{ 
+	  			iModel.selectedIncident = null;
+	  		}
+	  		enableDispatch('reset');
+	  		
+	  		dispatchAcc.selectedIndex = index;
+	  	}
+	  	
+	  	
+	  	
+	  	private function enableDispatch(callingFn : String) : void
+	  	{
+	  		var unitsToDispatch : ArrayCollection = dispatchList.dataProvider as ArrayCollection;
+
+	  		for each (var unit : UnitVO in unitsToDispatch)
+	  		{
+	  			unit.isPending = true;
+	  		}	  		
+	  			  				 	
+	  	
+	  		if ((selectedEvent.toLowerCase().match("no incident selected")) || (!this.checkForResources(callingFn)))
+	  		{
+	  			//Alert.show("false");
+	  			dispatch.enabled = false;
+	  			dispatchBorder.setStyle("borderColor", "red");
+	  		}
+	  		else
+	  		{
+	  			//Alert.show("true");
+	  			dispatch.enabled = true;
+	  			dispatchBorder.setStyle("borderColor", "#009dff");
+	  		}
+	  		
+	  		dispatchLabel.htmlText = "Dispatch to: <br />" + selectedEvent;
+	  		
+	  		return void;
+	  	}
+	  	
+	  	public function setSelectedEvent(event : String) : void
+	  	{
+	  		if (event != null)
+	  		{
+	  			selectedEvent = event;
+	  			enableDispatch('selectedEvents');	  	
+	  		}
+	  		else
+	  		{
+	  			selectedEvent = "no incident selected";
+	  		}
+	  		return void;
+	  	}
+	  	
+	  	private function checkForResources(callingFn : String) : Boolean
+	  	{ 
+	  		var totalItems : int = dispatchList.dataProvider.length;
+	  		
+	  		if (totalItems > 0)
+	  		{
+	  			return true;
+	  		}
+	  				  		
+	  		return false;
+	  		
+	  }  		  	
+	  	
+	  	
+	  	
+	  	private function dispatchResources() : void {
+	  		var ErrorEvent : ControlEvent = new ControlEvent('alert');
+	  		var dispatchEvent : ControlEvent = new ControlEvent('evt_dispatch');
+	  		
+	  		
+	  		
+	  		if (iModel.selectedIncident == null) {		  				
+				ErrorEvent.data = " Please select an incident in the Tracker! ";					
+				ErrorEvent.dispatch();
+				resetView();		  				
+	  		} else if (dispatchList.dataProvider.length == 0) {
+				ErrorEvent.data = " Please select resources to dispatch ! ";					
+				ErrorEvent.dispatch();	
+				resetView();	  			
+	  		} else {	
+	  			dispatchEvent.data = dispatchList.dataProvider;
+	  			dispatchEvent.dispatch();
+	  			resetView();	
+	  		}  	
+	  		
+	  	}
+	  			  		
+		
+		private function getResourceLabel ( item : Object) : String {            	
+	    	var unit : UnitVO = item as UnitVO;
+	    	var resource : ResourceVO = rModel.getResource(unit.resourceID);
+	    	var label : String;
+	    	label = "#" + unit.badgeNo;
+	    	
+	    	return label;            	
+	    }
+		
+		private function getResourceIcon ( item : Object) : Class {            	
+	    	var unit : UnitVO = item as UnitVO;
+	    	return rModel.getIcon(unit.resourceID, true);            	
+	    }
+	    
+	
+
+	    
+	  ]]>
+	</fx:Script>
+
+
+			
+ <!--===============================================================================\
+   | U.I. Code
+ \================================================================================-->
+	
+	
+	<s:HGroup width="100%" height="100%">
+		
+		
+		
+		<s:VGroup width="100%" height="100%" paddingLeft="10" paddingTop="10">
+					
+			<mx:Accordion id="dispatchAcc" width="100%" height="100%" headerStyleName="accHeader" focusIn="enableDispatch('accordian')">
+				<mx:Repeater id="rList" dataProvider="{pModel.currentPlayer.resources}" height="100%" >
+					<mx:Canvas id="rLabel" label="{rList.currentItem.label} ({rModel.getResourceAvailable(rList.currentItem.resourceID)})" 
+							   width="100%" height="100%" horizontalScrollPolicy="off" verticalScrollPolicy="on"> 
+		<!--itemRenderer="getResourceIcon"-->
+						<s:List
+				    		dataProvider="{uModel.getDispatchableUnits(rList.currentItem.resourceID)}" 
+							itemRenderer="edu.psu.ist.neocities.component.OldComponent.DispatchLabel"
+							
+						    allowMultipleSelection="true"
+						    dragEnabled="true"
+						    dragMoveEnabled="true"
+						    dropEnabled="true" 
+							borderVisible="false"
+							
+						    width="100%"
+						    height = "100%"
+ 							dragComplete="enableDispatch('resourceList')" >							
+							<!-- showDataTips="true"
+							dataTipField="message" -->
+							<s:layout>
+								<s:TileLayout requestedColumnCount="3"  />
+								
+							</s:layout>	
+							
+						</s:List>
+				
+					</mx:Canvas>
+				</mx:Repeater>
+			</mx:Accordion>			
+			
+			<mx:Label id="dispatchLabel" htmlText="Dispatch to:"  fontWeight="bold" />
+			
+			<s:HGroup height = "10%" paddingRight="10" paddingBottom="10" >
+				<s:Button id="reset" label="Reset" click="resetView()" />
+				<s:Button id="dispatch" label="Dispatch Resources" click="dispatchResources()" />
+			</s:HGroup>
+
+		</s:VGroup>
+		
+	<s:VGroup verticalAlign="top" width="100%" height="100%" paddingRight="10">
+			<s:Label text="Dispatch List:" fontWeight="bold" fontSize="14"/>
+	<!--itemRenderer="getResourceIcon" -->					
+		
+		<s:BorderContainer id="dispatchBorder" borderWeight="3" borderColor="red" width="100%" height="100%">
+				<s:List id="dispatchList"  						
+					    itemRenderer="edu.psu.ist.neocities.component.OldComponent.DispatchLabel"
+								    
+					    dragEnabled="false"
+					    dragMoveEnabled="false" 
+						dropEnabled="true"
+					    horizontalCenter="true"
+					 	width="100%" height="100%"
+					 	dragComplete="enableDispatch('dispatch')"
+					 	styleName="dList" borderVisible="true"
+						>
+					<s:layout>
+						<s:TileLayout requestedColumnCount="1" rowHeight="40"/>
+					</s:layout>
+					 
+				</s:List>
+		</s:BorderContainer>
+		
+		<mx:HBox width="100%" height="5%">
+			</mx:HBox>				
+	</s:VGroup> 
+	
+</s:HGroup>					
+	
+</s:Panel>
+

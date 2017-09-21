@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<s:Panel xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:v="edu.psu.ist.neocities.view.*" title="System Monitor" height="100%" width="100%" xmlns:OldView="edu.psu.ist.neocities.view.OldView.*" >
+	<s:layout>
+		<s:VerticalLayout paddingBottom="0" paddingTop="0" />
+	</s:layout>
+				
+	<OldView:PlayerUnits />
+
+
+</s:Panel>

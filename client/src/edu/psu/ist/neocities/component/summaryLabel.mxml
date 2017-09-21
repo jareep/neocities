@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:MXDataGridItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" >
+	<s:layout>
+		<s:HorizontalLayout verticalAlign="middle" />
+	</s:layout>
+	
+	<fx:Script>
+		<![CDATA[
+		
+		import com.pnwrain.easyCG.model.ModelFactory;
+		
+		import edu.psu.ist.neocities.oldModel.IncidentModel;
+		import edu.psu.ist.neocities.model.ImageModel;
+		import edu.psu.ist.neocities.model.RoleModel;
+		import edu.psu.ist.neocities.oldValue.IncidentVO;	
+		import edu.psu.ist.neocities.component.PanelToolTip;
+		
+		import mx.events.ToolTipEvent;
+		
+		
+		[Bindable]
+		private var imageModel : ImageModel = ModelFactory.getModel("ImageModel") as ImageModel;
+		
+		[Bindable]
+		private var iModel : IncidentModel = ModelFactory.getModel("IncidentModel") as IncidentModel;
+		
+		[Bindable]
+		private var rModel : RoleModel = ModelFactory.getModel("RoleModel") as RoleModel;
+		
+		private function getIcon( incidentID : String ) : Class {
+		var incident : IncidentVO = iModel.getIncident(incidentID);
+		
+		return imageModel.getIncidentIcon(incident.icon);
+		}
+		
+		private function getDescription( incidentID : String ) : String {
+		var incident : IncidentVO = iModel.getIncident(incidentID);
+		
+		return incident.getDescription(int(rModel.currentPlayer.roleID));
+		}
+		
+		private function getLabel( incidentID : String ) : String {
+		var incident : IncidentVO = iModel.getIncident(incidentID);
+		
+		return incident.label;
+		}
+		
+		private function createCustomTip(incidentID : String, event:ToolTipEvent) : void {
+		var ptt:PanelToolTip = new PanelToolTip();
+		
+		ptt.title = this.getLabel(incidentID);
+		ptt.bodyText = this.getDescription(incidentID);
+		
+		event.toolTip = ptt;
+		}
+		
+		]]>
+	</fx:Script>	
+
+
+
+	
+		<mx:LinkButton icon = "{getIcon(data.incidentID)}"
+			label="{getLabel(data.incidentID)}"
+		    toolTip=" "
+		    toolTipCreate="createCustomTip( data.incidentID, event)"
+		 	enabled="false" 
+		 	disabledColor="#000000" color="#000000"
+			/>	
+
+	
+</s:MXDataGridItemRenderer>

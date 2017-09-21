@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Panel xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 title="Briefings" >
+	<fx:Declarations>
+
+	</fx:Declarations>
+
+
+	<fx:Script>
+		<![CDATA[
+			import com.pnwrain.easyCG.model.ModelFactory;
+			
+			import edu.psu.ist.neocities.oldModel.BriefingModel;
+			
+			import mx.controls.Alert;
+			
+			[Bindable]
+			public var bModel : BriefingModel = ModelFactory.getModel("BriefingModel") as BriefingModel;
+			
+			public function initView() : void
+			{
+				this.getCurrentBriefing();
+			}
+			
+			protected function previousBriefing(event:MouseEvent):void
+			{
+				if (bModel.isInit)
+				{
+					briefingHolder.removeAllElements();
+					briefingHolder.addElement(bModel.getPreviousBriefingView());
+				}
+				
+			}
+
+			protected function nextBriefing(event:MouseEvent):void
+			{
+				if (bModel.isInit)
+				{
+					briefingHolder.removeAllElements();
+					//Alert.show(bModel.getBriefingAt(0).briefing);
+					briefingHolder.addElement(bModel.getNextBriefingView());
+				}
+			}
+			
+			protected function getCurrentBriefing ()  : void
+			{
+				if (bModel.isInit)
+				{
+					briefingHolder.removeAllElements();
+					briefingHolder.addElement(bModel.getMostCurrentBriefingView());
+				}
+			}
+
+		]]>
+	</fx:Script>
+	
+	<s:VGroup width="100%" height="100%" gap="0">
+		<s:VGroup id="briefingHolder" width="100%" height="96%" verticalAlign="middle" horizontalAlign="center">
+			<mx:Text id="briefingText" width="100%" height="96%" text="No briefings available"/>
+		</s:VGroup>
+		
+		<s:HGroup width="100%">
+			<s:Button label="&lt;" width="40%" click="previousBriefing(event)"/>
+			<s:Label text="{bModel.curBriefing + 1} / {bModel.data.length}" verticalAlign="middle" textAlign="center" height="100%" width="20%"/>
+			<s:Button label="&gt;" width="40%" click="nextBriefing(event)"/>
+			
+		</s:HGroup>
+	</s:VGroup>
+</s:Panel>

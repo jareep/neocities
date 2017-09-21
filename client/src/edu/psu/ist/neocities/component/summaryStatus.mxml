@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:MXDataGridItemRenderer xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 		xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 		xmlns:s="library://ns.adobe.com/flex/spark">
+	
+<fx:Script>
+	<![CDATA[
+	
+	import com.pnwrain.easyCG.model.ModelFactory;
+	
+	import edu.psu.ist.neocities.oldModel.IncidentModel;
+	import edu.psu.ist.neocities.oldValue.IncidentVO;	
+	import edu.psu.ist.neocities.component.PanelToolTip;
+	
+    import mx.events.ToolTipEvent;
+	           
+	[Bindable]
+   	private var iModel : IncidentModel = ModelFactory.getModel("IncidentModel") as IncidentModel;
+  	   	
+   	private function getStatus( incidentID : String ) : String {
+   		var incident : IncidentVO = iModel.getIncident(incidentID);   	
+   		return incident.status;
+   	}
+   	
+   	private function getLabel( incidentID : String ) : String {
+   		var incident : IncidentVO = iModel.getIncident(incidentID);
+   		
+   		return incident.label;
+   	}
+   	
+   	private function getFeedbackMSG ( incidentID : String ) : String {
+   		var incident : IncidentVO = iModel.getIncident(incidentID);
+   		
+   		return incident.feedback;
+   	}
+   	
+   	private function createCustomTip(incidentID : String, event:ToolTipEvent) : void {
+       var ptt:PanelToolTip = new PanelToolTip();
+      	   ptt.title = "Event " + this.getStatus(incidentID) +":";
+           ptt.bodyText = this.getFeedbackMSG(incidentID);
+                  
+       event.toolTip = ptt;
+    }
+	                
+	]]>
+</fx:Script>
+	
+	<s:HGroup horizontalAlign="center" verticalAlign="middle" textAlign="center">
+		<mx:Label
+			text="{getStatus(data.incidentID)}"
+		    toolTip=" "
+		    toolTipCreate="createCustomTip( data.incidentID, event)"
+			textDecoration="underline" textAlign="center" fontWeight="bold"/>	
+	</s:HGroup>
+		
+</s:MXDataGridItemRenderer>

@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:NavigatorContent label="Scenario Scores"
+		 			xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 			xmlns:s="library://ns.adobe.com/flex/spark"
+		 			xmlns:mx="library://ns.adobe.com/flex/mx"
+					width="100%" height="100%">
+	<s:layout>
+		<s:VerticalLayout horizontalAlign="left" verticalAlign="top" />
+	</s:layout>	  
+	<fx:Script>
+		<![CDATA[
+			import edu.psu.ist.neocities.oldValue.IncidentVO;
+			import edu.psu.ist.neocities.oldModel.IncidentModel;
+			import edu.psu.ist.neocities.value.ScoreVO;
+			import edu.psu.ist.neocities.model.ScoreModel;
+			import com.pnwrain.easyCG.model.ModelFactory;
+			import com.pnwrain.easyCG.events.ControlEvent;
+			import mx.formatters.NumberBase;
+			import mx.collections.ArrayCollection;			
+			
+			[Bindable]
+			public var scoreModel : ScoreModel = ModelFactory.getModel('ScoreModel') as ScoreModel;		
+			
+			
+			
+			[Bindable]
+			private var nb : NumberBase = new NumberBase();		
+						
+			private function testView() : void
+			{   			
+	   			scoreModel.data = new ArrayCollection();
+	   			scoreModel.teamAverage = 48;
+	   			scoreModel.scenarioScore = 368;
+	   			
+	   			var score : ScoreVO = new ScoreVO();
+	   				score.normalScore = 50;
+	   				score.rawScore = 125;
+	   				score.worstScore = 250;
+	   				
+	   			scoreModel.data.addItem(score);
+	   			
+	   			var score2 : ScoreVO = new ScoreVO();	
+	   				score2.normalScore = 68;
+	   				score2.rawScore = 80;
+	   				score2.worstScore = 250;
+	   				
+	   			scoreModel.data.addItem(score2);
+	   			
+	   			var score3 : ScoreVO = new ScoreVO();	
+	   				score3.normalScore = 35;
+	   				score3.rawScore = 162;
+	   				score3.worstScore = 250;
+	   				
+	   			scoreModel.data.addItem(score3);   
+				
+			}
+			
+			private function formatRawScore( item : Object, col:DataGridColumn) : String {
+				
+				var score : ScoreVO = item as ScoreVO;
+				
+				return nb.formatPrecision(score.rawScore.toString(), 0);
+			}
+			
+			private function formatWorstScore( item : Object, col:DataGridColumn) : String {
+				
+				var score : ScoreVO = item as ScoreVO;
+				
+				return nb.formatPrecision(score.worstScore.toString(), 0);
+			}
+			
+			private function formatNormalScore( item : Object, col:DataGridColumn) : String {
+				
+				var score : ScoreVO = item as ScoreVO;
+				
+				return nb.formatPrecision(score.normalScore.toString(), 0) + "%";
+			}
+			
+			private function getIncidentLabel ( item : Object, col:DataGridColumn ) : String {
+				var score : ScoreVO = item as ScoreVO;
+				
+				
+				
+				return "";
+			}
+			
+			private function getIncidentStatus( item : Object, col:DataGridColumn ) : String {
+				var score : ScoreVO = item as ScoreVO;
+				
+				
+				
+				return "";
+			}
+			
+			private function updateScores () : void
+			{
+				//ts.text = nb.formatPrecision(scoreModel.getDispatchScore().toString(), 0) + "%";
+			}
+			
+			public function copyToClipBoard() : void
+            {
+            	var copy : String = "";
+				
+            	copy += "Team Score" + "\t";
+            	copy += "Total Damage done"  + "\t";
+            	copy += "Total Damage possible"  + "\n";
+            	
+            	copy+= nb.formatPrecision(scoreModel.teamAverage.toString(), 3) + "\t";
+            	copy+= nb.formatPrecision(scoreModel.scenarioScore.toString(), 3) + "\t";
+            	copy+= nb.formatPrecision(scoreModel.scenarioTotal.toString(), 3) + "\n";
+            	
+            	System.setClipboard(copy);
+            }
+			
+		]]>
+	</fx:Script>
+	
+ <!--===============================================================================\
+   | U.I. Code
+ \================================================================================-->
+  
+
+	<s:BorderContainer width="100%" height="100%" borderVisible="false">
+		<s:layout>
+			<s:VerticalLayout />
+		</s:layout>
+		<s:Label text="Event Scores" />
+		
+		<s:BorderContainer width="100%" borderVisible="false">
+			<s:layout>
+				<s:HorizontalLayout horizontalAlign="center" />
+			</s:layout>	
+			
+		
+			<s:VGroup width="33%" horizontalAlign="center">
+				<mx:Label text="Team Score:" fontWeight="bold" fontSize="14"/>
+				<mx:Label text="{nb.formatPrecision(scoreModel.teamAverage.toString(), 2)}%" fontWeight="bold" fontSize="36"/>
+				<mx:Label text="Higher is Better" fontSize="10"/>							
+			</s:VGroup>
+			
+			
+			<s:VGroup width="33%" horizontalAlign="center">
+				<s:Label text="Total Damage:" fontWeight="bold" fontSize="14"/>
+				<s:HGroup verticalAlign="top">
+					<s:Label text="{nb.formatPrecision(scoreModel.scenarioScore.toString(), 2)}" fontWeight="bold" fontSize="36"/>
+					<s:Label text=" / {nb.formatPrecision(scoreModel.scenarioTotal.toString(), 2)}" />	
+				</s:HGroup>			
+				<s:Label text="Lower is Better" fontSize="10"/>							
+			</s:VGroup>
+			
+		</s:BorderContainer>
+		<s:Button label="Copy to clipboard" click="this.copyToClipBoard()"/>
+		<s:Label text="Event Scores:" fontWeight="bold" fontSize="14"/>
+		
+	    <mx:DataGrid id="scoreGrid" 
+			width="100%" height="100%" 
+			dataProvider="{scoreModel.data}" change="this.updateScores()">
+	    	<mx:columns>
+	    		
+	    		<mx:DataGridColumn headerText="Incident" 
+	    			textAlign="left" width="150"
+	    			itemRenderer="edu.psu.ist.neocities.component.summaryLabel"
+	    			/>
+	    		 <mx:DataGridColumn headerText="Status" 
+	    			textAlign="center" width="50"
+	    			itemRenderer="edu.psu.ist.neocities.component.summaryStatus"
+	    			/>    		    	   			    	   	
+	    		<mx:DataGridColumn headerText="Score"
+	    		    width="25"
+	    		   	labelFunction="formatNormalScore" 
+	    			textAlign="center" 
+	    			/>  
+	    		<mx:DataGridColumn headerText="Damage" 
+	    		    width="100"
+	    			textAlign="center"
+	    		   	itemRenderer="edu.psu.ist.neocities.component.BarScore" 
+	    			/>
+	    		 				
+	    	</mx:columns>
+	    </mx:DataGrid>
+
+	</s:BorderContainer>
+	
+</s:NavigatorContent>

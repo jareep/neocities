@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:MXDataGridItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 xmlns:mx="library://ns.adobe.com/flex/mx"  width="40" height="50" >
+    
+	<fx:Style>
+		@namespace s "library://ns.adobe.com/flex/spark";
+		@namespace mx "library://ns.adobe.com/flex/mx";
+		
+		.noScroll {
+			horizontalScrollPolicy: off;
+			verticalScrollPolicy: off;
+		}		
+	</fx:Style>
+	
+	
+    <fx:Script>
+    	<![CDATA[    		
+    		import com.pnwrain.easyCG.model.ModelFactory;
+    		import com.pnwrain.easyCG.events.ControlEvent;
+    		import edu.psu.ist.neocities.oldModel.ResourceModel;
+    		import edu.psu.ist.neocities.value.UnitVO;
+    		
+    		[Bindable]
+   			private var rModel : ResourceModel = ModelFactory.getModel("ResourceModel") as ResourceModel;
+   			
+   	    					    		
+    		private function getResourceIcon ( resourceID : String, available : Boolean) : Class {            									    	
+		    	//ignore the Available status when using the dispatchedUnits AC		    	
+		    	return rModel.getIcon(resourceID, true);            	
+		    }
+		    
+		    private function launchRecall(badgeNo : uint):void {		       		       
+	            var event : ControlEvent = new ControlEvent('evt_recallWindow');
+					event.data = badgeNo;
+					trace("Player Units - request launching of RecallPopup");
+					event.dispatch();
+		       
+		       return void;
+		    }  
+    	]]>
+    </fx:Script>
+    
+	<s:VGroup verticalAlign="middle" horizontalAlign="center" styleName="noScroll">
+		<mx:LinkButton 
+			icon = "{getResourceIcon(data.resourceID, data.available)}"
+			width="0"
+			enabled="true" 
+			click="{launchRecall(data.badgeNo)}"
+			rollOverColor="#FFFFFF"
+			accentColor="#FFFFFF"
+			selectedUpSkin="{null}"
+			selectedOverSkin="{null}"
+			selectedDownSkin="{null}"
+			upSkin="{null}"
+			downSkin="{null}"
+			skin="{null}"
+			/>
+		<mx:Text text="#{data.badgeNo}" />
+	</s:VGroup>
+</s:MXDataGridItemRenderer>

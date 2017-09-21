@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:NavigatorContent label="Event  History"
+		 			xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 			xmlns:s="library://ns.adobe.com/flex/spark"
+		 			xmlns:mx="library://ns.adobe.com/flex/mx"
+					xmlns:util="edu.psu.ist.neocities.util.*" 
+					width="100%" height="100%" 
+					creationComplete="initView();">
+		<s:layout>
+			<s:VerticalLayout />
+		</s:layout>
+	
+		<fx:Script>
+        <![CDATA[
+        	import mx.formatters.NumberBase;
+        	import mx.controls.dataGridClasses.DataGridColumn;
+        	
+        	 
+        	import edu.psu.ist.neocities.oldValue.IncidentVO;
+ 			import edu.psu.ist.console.value.EventHistoryVO;
+        	import edu.psu.ist.neocities.value.ScoreVO;
+        	
+        	import mx.collections.ArrayCollection;
+        	import mx.controls.Alert;
+           
+            import com.pnwrain.easyCG.model.ModelFactory;
+            
+            import edu.psu.ist.console.model.HistoryModel;
+            import edu.psu.ist.neocities.oldModel.*;
+                        
+            [Bindable]
+            public var hModel : HistoryModel = ModelFactory.getModel("HistoryModel") as HistoryModel;
+ 
+            [Bindable]
+            public var iModel : IncidentModel = ModelFactory.getModel("IncidentModel") as IncidentModel;    
+            
+            [Bindable]
+			private var nb : NumberBase = new NumberBase();		
+            
+            private var filterBy : ArrayCollection = new ArrayCollection();
+            
+            private function initView() : void {
+            
+            }
+
+            private function autoScrollTextArea():void {
+                events.validateNow();
+                events.verticalScrollPosition = events.maxVerticalScrollPosition;                
+            }
+            
+			
+			private function formatEventName(item : Object, col:DataGridColumn) : String
+            {
+            	var eventHistory : EventHistoryVO = item as EventHistoryVO;
+            	
+            	return getEventName(eventHistory.eventID);
+            }
+            
+            private function getEventName(id : int) : String
+            {
+            	var incident : IncidentVO = iModel.getIncident(id.toString());
+            	
+            	return incident.label;
+            }
+            /*
+            private function formatStatus(item : Object, col:DataGridColumn) : String
+			{
+				var eventHistory : EventHistoryVO = item as EventHistoryVO;
+												
+				return getStatus(eventHistory.score.status);
+			}*/
+			
+			private function getStatus(status : Boolean) : String
+			{
+				if (status) { return "Completed"; }
+								
+				return "Failed";
+			}
+			
+			/*
+			private function formatNormalScore(item : Object, col:DataGridColumn) : String
+			{
+				var eventHistory : EventHistoryVO = item as EventHistoryVO;
+				
+				return nb.formatPrecision(eventHistory.score.normalScore.toString(), 0) + "%";
+			}
+			
+			private function formatScores (item : Object, col:DataGridColumn) : String
+			{
+				var eventHistory : EventHistoryVO = item as EventHistoryVO;
+				var score : Number;
+				
+				switch(col.dataField)
+				{
+					case "worstScore":
+						score = eventHistory.score.worstScore;
+						break;
+					case "normalScore":
+						score = eventHistory.score.normalScore;
+						break;
+					case "rawScore":
+						score = eventHistory.score.rawScore;
+						break;
+				}
+				
+				return nb.formatPrecision(score.toString(), 2);				
+			}
+	        */
+	        private function formatTimeStep(item : Object, col:DataGridColumn) : String
+            {
+            	var eventHistory : EventHistoryVO = item as EventHistoryVO;
+            	var timeStep : int;
+            	
+            	switch (col.dataField)
+            	{
+            		case "timeBegin":
+            			timeStep = int(eventHistory.timeBegin);
+            			break;
+            		case "eventDuration":
+            			timeStep = int(eventHistory.eventDuration);
+            			break;
+            		case "eventTimeLimit":
+            			timeStep = int(eventHistory.eventTimeLimit);
+            			break;
+            		case "timeOver":
+            			timeStep = int(eventHistory.timeOver);
+            			break;
+            	}            	
+            	
+            	timeStep = timeStep * 3;
+            	            	
+            	return timeStep.toString();           	
+            }
+            /*
+            public function copyToClipBoard() : void
+            {
+            	var copy : String = "";
+            	
+            	copy += "Event" + "\t";
+            	copy += "Status"  + "\t";
+            	copy += "Normal Score"  + "\t";
+            	copy += "Raw Score"  + "\t";
+            	copy += "Worst Score"  + "\t";
+            	copy += "Start Time"  + "\t";
+            	copy += "Duration"  + "\t";
+            	copy += "End Time"  + "\t";
+            	copy += "Time Limit"  + "\t";
+            	copy += "Dispatched Wrong"  + "\t";
+            	copy += "Dispatched Correct"  + "\t";
+            	copy += "Recalled Wrong"  + "\t";
+            	copy += "Recalled Correct"  + "\n";
+            	
+            	for each (var item : EventHistoryVO in hModel.eventHistory)
+            	{
+            			copy += this.getEventName(item.eventID)  + "\t";
+            			copy += this.getStatus(item.score.status) + "\t";
+            			copy += item.score.normalScore + "\t";
+            			copy += item.score.rawScore + "\t";
+            			copy += item.score.worstScore + "\t";
+            			copy += getStringFromNumber(int(item.timeBegin) * 3) + "\t";
+            			copy += getStringFromNumber(int(item.eventDuration) * 3) + "\t";
+            			copy += getStringFromNumber(int(item.timeOver) * 3) + "\t";
+            			copy += getStringFromNumber(int(item.eventTimeLimit) * 3) + "\t";
+            			copy += item.dispatchWrong + "\t";
+            			copy += item.dispatchCorrect + "\t";
+            			copy += item.recallWrong + "\t";
+            			copy += item.recallCorrect + "\n";
+            	}
+            	
+            	System.setClipboard(copy);
+            }
+            */
+            public function getStringFromNumber(num : Number) : String
+            {
+            	return num.toString()
+            }
+        ]]>
+    </fx:Script>
+	
+	<mx:DataGrid id="events" 
+		width="100%" height="100%" 
+		dataProvider="{hModel.eventHistory}"
+		updateComplete="autoScrollTextArea()"
+		focusIn="autoScrollTextArea()"
+		horizontalScrollPolicy="auto"
+		sortableColumns="false"
+		>
+		<mx:columns>
+			<mx:DataGridColumn headerText="Event"
+				textAlign="left" 
+				dataField="eventID"
+				width="70"
+				/>
+			
+			<mx:DataGridColumn headerText="Location-ID"
+				textAlign="center" 
+				dataField="locationID"
+				width="75"
+				 />
+			
+			<mx:DataGridColumn headerText="Status"
+							   textAlign="left" 
+							   dataField="failComplete"
+							   width="70"
+							   />
+				
+			<mx:DataGridColumn headerText="Complete Type"
+							   textAlign="center" 
+							   width="100"
+							   dataField="completeType"
+							   />
+			
+			<mx:DataGridColumn headerText="Normal Score"
+				textAlign="center" 
+				width="100"
+				dataField="score.normalScore"
+				/>
+				
+			<mx:DataGridColumn headerText="Raw Score"
+				textAlign="center" 
+				width="100"
+				dataField="score.rawScore"
+				/>
+				
+			<mx:DataGridColumn headerText="Worst Score"
+				textAlign="center" 
+				width="100"
+				dataField="score.worstScore"
+				/>
+			
+			<mx:DataGridColumn headerText="Initial Severity"
+							   textAlign="center"
+							   dataField="initialSeverity"
+							   width="100"
+							   />
+			
+			<mx:DataGridColumn headerText="Start Time"
+				textAlign="center"
+				dataField="timeBegin"
+				width="100"
+				/>
+						
+			<mx:DataGridColumn headerText="Duration"
+				textAlign="center"
+				dataField="eventDuration"
+				width="100"
+				/>
+				
+			<mx:DataGridColumn headerText="End Time"
+				textAlign="center"
+				dataField="timeOver"
+				width="125"
+				/>
+			
+			<mx:DataGridColumn headerText="Time Limit"
+				textAlign="center"
+				dataField="eventTimeLimit"
+				width="100"
+				/>
+			
+			<mx:DataGridColumn headerText="Raw Dispatched"
+				textAlign="center"
+				dataField="rawDispatch"
+				width="150"
+				/>
+					
+			<mx:DataGridColumn headerText="Dispatched Wrong"
+				textAlign="center"
+				dataField="dispatchWrong"
+				width="150"
+				/>
+				
+			<mx:DataGridColumn headerText="Dispatched Correct"
+				textAlign="center"
+				dataField="dispatchCorrect"
+				width="150"
+				/>
+				
+				
+		</mx:columns>	
+	</mx:DataGrid>
+	<!--s:Button label="Copy to ClipBoard" click="copyToClipBoard()" /-->
+	
+</s:NavigatorContent>

@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				autoDrawBackground="true"
+				rollOverColor="#FFFFFF"
+				width="100" height="50"
+				>
+	
+	<s:layout>
+		<s:HorizontalLayout verticalAlign="middle" horizontalAlign="center" />
+	</s:layout>		
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[    		
+			import com.pnwrain.easyCG.events.ControlEvent;
+			import com.pnwrain.easyCG.model.ModelFactory;
+			
+			import edu.psu.ist.neocities.oldModel.ResourceModel;
+			import edu.psu.ist.neocities.value.ResourceVO;
+			import edu.psu.ist.neocities.value.UnitVO;
+			
+			import mx.controls.Alert;
+			import mx.controls.Image;
+			import mx.core.DragSource;
+			import mx.core.IUIComponent;
+			import mx.events.FlexEvent;
+			import mx.managers.DragManager;
+			
+			[Bindable]
+			private var rModel : ResourceModel = ModelFactory.getModel("ResourceModel") as ResourceModel;
+						
+			
+			private function getResourceIcon ( resourceID : String, available : Boolean) : Class {            									    	
+				//ignore the Available status when using the dispatchedUnits AC		    	
+				return rModel.getIcon(resourceID, available);          	
+			}
+			
+			private function getResourceLabel ( resourceID : String) : String{            									    	
+				//ignore the Available status when using the dispatchedUnits AC		    	
+				return rModel.getResourceLabel(resourceID);       	
+			}
+			
+			protected function dragHandler(event:MouseEvent):void
+			{
+				//Alert.show("here");
+				if (data.available > 0)
+				{
+					var di :IUIComponent = event.currentTarget as IUIComponent;
+					var ds :DragSource = new DragSource();
+					
+					ds.addData((this.data as ResourceVO).getFirstAvailable(), "UnitVO");
+					
+					/*
+					var imageProxy :Image = new Image;
+					imageProxy.source = (getResourceIcon(data.resourceID, this.isAvailable())).source;
+					imageProxy.height=15;
+					imageProxy.width=15;   
+					*/
+					
+					DragManager.doDrag(di, ds , event);
+				}
+				else
+				{
+					
+				}
+			}
+			
+			protected function dropHandler(event:MouseEvent):void
+			{
+
+			}
+			
+			private function reloadIcon():void
+			{
+				icon.setStyle("icon", getResourceIcon(data.resourceID, this.isAvailable()));
+				if (!this.isAvailable())
+				{
+					icon.enabled = false;		
+				}	
+				else
+				{
+					icon.enabled = true;
+				}
+			}
+			private function isAvailable() :Boolean
+			{
+				if (data.available == 0)
+				{	
+					return false;
+					icon.useHandCursor = false;
+				}
+				
+				return true;
+				icon.useHandCursor = true;
+			}
+			
+			private function getToolTip() : String
+			{
+				if (data.available == 0)
+				{
+					return "No available units";
+				}
+				
+				return "Drag me...";
+		
+			}
+
+
+		]]>
+	</fx:Script>	
+	
+	<s:HGroup verticalAlign="middle">
+		<mx:LinkButton 
+			id="icon"
+			icon = "{getResourceIcon(data.resourceID, this.isAvailable())}"
+			toolTip="{this.getResourceLabel(data.resourceID)}"
+			useHandCursor="{this.isAvailable()}"
+			mouseDown="dragHandler(event)"
+			dragComplete="dropHandler(event)"
+			skin="{null}"
+			
+			/>
+		<mx:Text text="{data.available}/{data.total}" />
+	</s:HGroup>	
+</s:ItemRenderer>

@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
+				xmlns:s="library://ns.adobe.com/flex/spark"
+				xmlns:mx="library://ns.adobe.com/flex/mx"
+				layout="vertical" 
+				width="500" height="400"
+				showCloseButton="true"
+			    close="removeMe()"
+			    title="Debug Window"
+				>
+
+<fx:Script>
+	<![CDATA[
+	
+		import com.pnwrain.easyCG.events.ControlEvent;
+		import com.pnwrain.easyCG.model.ModelFactory;
+		import edu.psu.ist.neocities.model.*;
+		import mx.managers.PopUpManager;
+		
+		[Bindable]
+		private var rModel : ResourceModel = ModelFactory.getModel("ResourceModel") as ResourceModel;
+		
+		[Bindable]
+		private var uModel : UnitModel = ModelFactory.getModel("UnitModel") as UnitModel;
+		[Bindable]
+		private var pModel : RoleModel = ModelFactory.getModel("RoleModel") as RoleModel;
+		
+		private function removeMe():void {
+            // Put any clean-up code here.
+            PopUpManager.removePopUp(this);              
+        }
+				
+		private function changeStateRequest( _msg : String ) : void
+		{
+			var event : ControlEvent = new ControlEvent('changeStateRequest');
+			event.data =  _msg;
+			trace("NeoCities - ChangeStateRequest " + _msg);
+			event.dispatch();					
+		}
+
+	   
+		private function alertMe( _msg : String ) : void
+		{
+			var event : ControlEvent = new ControlEvent('alert');
+			event.data = _msg;
+			event.dispatch();
+		}
+		
+		private function clearData( ) : void
+		{
+			var event : ControlEvent = new ControlEvent('clearData');
+			event.dispatch();
+		}
+		
+		private function loadTestData(): void 
+		{
+			var event:ControlEvent = new ControlEvent("loadSimulation");			
+			event.dispatch();				
+		}
+		
+		private function pauseScreen() : void
+		{
+			var event:ControlEvent = new ControlEvent("evt_pauseAlert");
+			event.dispatch();
+		}
+		
+		private function loadSummary() : void
+		{
+			var event:ControlEvent = new ControlEvent("evt_endGame");
+			event.dispatch();
+		}
+		
+	]]>
+</fx:Script>
+	<mx:TabNavigator width="100%" height="100%">
+		
+		<s:NavigatorContent label="Simulation">
+			<s:BorderContainer width="100%" height="100%">
+				<s:layout>
+					<s:HorizontalLayout />
+				</s:layout>
+				
+				<s:BorderContainer width="100%" height="100%" borderVisible="false">
+					<s:layout>
+						<s:VerticalLayout paddingLeft="10" />
+					</s:layout>
+					
+					<s:Label text="Events:" paddingLeft="-5" />
+					<s:Button label="Reset Data" click="clearData()" />
+					<s:Button label="Load Simulation" click="loadTestData()"/>
+					<s:Button label="Pause yo..." id="pause" click="pauseScreen()"/>
+					<s:Button label="Summary Window" id="summary" click="loadSummary()"/>
+				</s:BorderContainer>
+	
+				<s:BorderContainer width="100%" height="100%" borderVisible="false">
+					<s:layout>
+						<s:VerticalLayout paddingLeft="10"/>
+					</s:layout>
+					
+					<s:Label text="UI Manipulation:" paddingLeft="-5" />
+					<s:ComboBox id="selectState" close="changeStateRequest(selectState.selectedItem.data)"> 
+						<s:ArrayCollection>
+							<fx:Object label="Login" data="Login"/>
+					    	<fx:Object label="Decision Space" data="Decision"/>
+					     	<fx:Object label="Summary Report" data="Summary"/>
+					  </s:ArrayCollection>
+					</s:ComboBox>
+	
+				</s:BorderContainer>
+			
+			</s:BorderContainer>
+		</s:NavigatorContent>
+		
+		
+		<s:NavigatorContent label="Players">
+			<s:BorderContainer width="100%" height="100%">
+				<s:layout>
+					<s:VerticalLayout />
+				</s:layout>
+				
+				<mx:DataGrid dataProvider="{pModel.data}" 
+					         width="100%" height="100%">
+					<mx:columns>
+						<mx:DataGridColumn dataField="roleID" width="50" />
+						<mx:DataGridColumn dataField="role" />
+						<mx:DataGridColumn dataField="userName" />
+						<mx:DataGridColumn dataField="incidentID" />
+					</mx:columns>
+				</mx:DataGrid>
+			</s:BorderContainer>
+		</s:NavigatorContent>
+		
+		<s:NavigatorContent label="Incidents">
+			<s:BorderContainer width="100%" height="100%">
+				<s:layout>
+					<s:VerticalLayout />
+				</s:layout>
+				
+				<mx:DataGrid dataProvider="{pModel.data}" 
+					         width="100%" height="100%"
+					         horizontalScrollPolicy="on" 
+					         >
+					<mx:columns>
+						<mx:DataGridColumn dataField="incidentID" />
+						<mx:DataGridColumn dataField="label" width="100" />
+						<mx:DataGridColumn dataField="time" />
+						<mx:DataGridColumn dataField="description" width="200" />
+						<mx:DataGridColumn dataField="icon" />
+						<mx:DataGridColumn dataField="status" />
+						<mx:DataGridColumn dataField="lat" />
+						<mx:DataGridColumn dataField="long" />
+					</mx:columns>
+					
+				</mx:DataGrid>
+			</s:BorderContainer>
+		</s:NavigatorContent>
+		
+		<s:NavigatorContent label="Resource">
+			<s:BorderContainer width="100%" height="100%">
+				<s:layout>
+					<s:VerticalLayout />
+				</s:layout>
+				
+				<mx:DataGrid dataProvider="{rModel.data}" 
+					         width="100%" height="100%">
+					<mx:columns>
+						<mx:DataGridColumn dataField="resourceID" />
+						<mx:DataGridColumn dataField="label" width="100" />
+						<mx:DataGridColumn dataField="roleID" width="50" />
+						<mx:DataGridColumn dataField="available" />
+						<mx:DataGridColumn dataField="dispatched" />
+						<mx:DataGridColumn dataField="total" />
+					</mx:columns>
+				</mx:DataGrid>
+			</s:BorderContainer>
+		</s:NavigatorContent>
+		
+		<s:NavigatorContent label="Units">
+			
+			<s:BorderContainer width="100%" height="100%">
+				<s:layout>
+					<s:VerticalLayout />
+				</s:layout>
+				
+				<mx:DataGrid dataProvider="{uModel.data}" 
+					         width="100%" height="100%">
+					<mx:columns>
+						<mx:DataGridColumn dataField="badgeNo" />
+						<mx:DataGridColumn dataField="resourceID" />
+						<mx:DataGridColumn dataField="incidentID" />
+						<mx:DataGridColumn dataField="available" />
+						<mx:DataGridColumn dataField="status" />
+						<mx:DataGridColumn dataField="message" />
+						<mx:DataGridColumn dataField="playerMessage" />
+					</mx:columns>
+				</mx:DataGrid>
+			</s:BorderContainer>
+		</s:NavigatorContent>
+		
+	</mx:TabNavigator>
+	
+</mx:TitleWindow>

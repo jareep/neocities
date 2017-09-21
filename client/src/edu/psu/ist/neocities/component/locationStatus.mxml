@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:MXDataGridItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+						  xmlns:s="library://ns.adobe.com/flex/spark" 
+						  xmlns:mx="library://ns.adobe.com/flex/mx" 
+						  xmlns:comps="comps.*"
+						  focusEnabled="true" contentBackgroundColor="0x38A438">
+	<s:layout>
+		<s:HorizontalLayout verticalAlign="middle" horizontalAlign="center" />
+	</s:layout>	
+	
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.utils.IntUtil;
+			import com.pnwrain.easyCG.model.ModelFactory;
+			
+			import edu.psu.ist.neocities.value.LocationVO;
+			
+			
+			
+			private function getStatus( _numInformation : int ) : void {
+				
+				
+				var color: String = "0x670606";
+				
+				if (Math.ceil(_numInformation) >= 7){
+					color = "0x000000"; //BLACK 
+					
+				}
+				else if (Math.ceil(_numInformation) >= 6){
+					color = "0x670606"; //BROWN background
+					
+				}
+				else if (Math.ceil(_numInformation) >= 5){
+					
+					color = "0xB83607"; //RED-BROWN background
+					
+				}
+				else if (Math.ceil(_numInformation) >= 4){
+					color = "0xEB470C"; //RED background
+					
+				}
+				else if (Math.ceil(_numInformation) >= 3){
+					color = "0xF28913"; //DARK ORANGE background
+					
+				}
+				else if (Math.ceil(_numInformation) >= 2){
+					color = "0xFFB61F"; //ORANGE background
+					
+				}
+				else if (Math.ceil(_numInformation) >= 1){
+					color = "0xF6E422"; //YELLOW background
+					
+				}
+					
+				else if (Math.ceil(_numInformation) <= 0){
+					//this.setStyle("contentBackgroundColor",0x38A438); //GREEN background
+					color = "0x38A438";				
+				}
+				
+				
+				solidColor.color = parseInt(color);
+				solidColor1.color = parseInt(color);
+				//solidColor2.color = parseInt(color);	
+				
+			}// getStatus
+			
+			override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number) : void{
+				
+				super.updateDisplayList(unscaledWidth, unscaledHeight);
+				
+				getStatus(data.numInformation);
+				
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:Group>
+		<s:Ellipse  width="30" height="30">
+			<s:stroke>
+				<s:SolidColorStroke id="solidColor1" color="0x38A438" weight="1" alpha=".9"/>
+			</s:stroke>
+			<s:fill>
+				<s:RadialGradient>
+					<s:GradientEntry id="solidColor" color="0x38A438" ratio=".5" alpha=".7"/>
+				</s:RadialGradient>
+			</s:fill>
+		</s:Ellipse>
+	</s:Group>
+	
+</s:MXDataGridItemRenderer>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This was for the scenario designer which is no longer used
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" textAlign="center" verticalAlign="middle">
+	
+	<mx:Script>
+		<![CDATA[
+		
+		import com.pnwrain.easyCG.model.ModelFactory;
+		
+		import edu.psu.ist.neocities.model.ImageModel;
+	
+		
+		[Bindable]
+   		private var imageModel : ImageModel = ModelFactory.getModel("ImageModel") as ImageModel;
+		                
+		]]>
+	</mx:Script>
+
+	<mx:LinkButton icon = "{imageModel.getIncidentIcon(data.incident.icon)}"
+		label="{data.incident.label}"
+	 	enabled="false" 
+	 	disabledColor="#000000"
+		/>	
+	
+	
+</mx:HBox>-->

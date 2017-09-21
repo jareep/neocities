@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<mx:Canvas  xmlns:ns1="net.goozo.mx.dockable.*" 
+			xmlns:fx="http://ns.adobe.com/mxml/2009"
+			xmlns:s="library://ns.adobe.com/flex/spark"
+			xmlns:mx="library://ns.adobe.com/flex/mx"
+		 	xmlns:v="edu.psu.ist.neocities.view.*"
+		 	width="100%" height="100%" xmlns:OldView="edu.psu.ist.neocities.view.OldView.*"
+		    >
+	
+	<fx:Script>
+		<![CDATA[
+			import com.pnwrain.easyCG.events.ControlEvent;
+			
+			public function initView() : void
+			{
+				var event : ControlEvent = new ControlEvent('evt_subscribe');
+					event.data = "Subscribe to BlazeDS Data Feeds";
+					event.dispatch();	
+				
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<mx:HDividedBox height = "100%" width="100%" borderVisible="false" >
+		<mx:VDividedBox height="100%" width="60%" borderVisible="false">
+			<OldView:Team id = "teamView" height="40%" width="100%" />
+		
+			<OldView:Tracker id="trackerView" height="100%" width="100%" />
+			<!--<v:dispatchSmall width="100%" height="20%" id="smallDispatch" />-->
+		</mx:VDividedBox>
+		
+		<mx:VDividedBox width="100%" height="100%" borderVisible="false">
+			<mx:HDividedBox height="38%" borderVisible="false" width="100%">
+				<!--<v:Dispatch id = "dispatchView" height="100%" width="100%" />-->
+				<v:Chat height="100%" width="100%" />
+				<OldView:BriefingPanel id="briefing" height="100%" width="100%" />
+			</mx:HDividedBox>
+			
+			<OldView:Monitor id = "Monitor" width="100%" height = "62%" />
+			
+		</mx:VDividedBox>
+	</mx:HDividedBox>
+
+</mx:Canvas>

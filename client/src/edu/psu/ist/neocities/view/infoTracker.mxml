@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Panel xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 title="Information Tracker" width="100%" height="100%">
+	<fx:Script>
+		<![CDATA[
+			import com.pnwrain.easyCG.model.ModelFactory;
+			
+			import edu.psu.ist.neocities.model.InformationModel;
+			import edu.psu.ist.neocities.model.LocationModel;
+			import edu.psu.ist.neocities.value.InformationVO;
+			import edu.psu.ist.neocities.model.RoleModel;
+			
+			import mx.collections.*;
+			import mx.controls.Alert;
+			import mx.events.ItemClickEvent;
+			
+			[Bindable]
+			public var iModel :InformationModel = ModelFactory.getModel("InformationModel") as InformationModel;
+			
+			[Bindable]
+			public var lModel :LocationModel = ModelFactory.getModel("LocationModel") as LocationModel;
+			
+			[Bindable]				
+			private var pModel : RoleModel = ModelFactory.getModel("RoleModel") as RoleModel;
+			
+			public function init_view() : void
+			{
+				var defaultTab :int = (pModel.currentPlayer.roleID - 1); // Shift role IDs to account for index=0 of the tab
+				this.dataFilterButtonBar.selectedIndex = defaultTab;
+				
+				// Set default datagrid filter based on user's role
+				if (defaultTab == 1) { // Antivirus
+					iModel.data.filterFunction = _filterAvInformation;
+					displayAvColumns();
+				} else if(defaultTab == 2) { // Windows Updates
+					iModel.data.filterFunction = _filterWinInformation;
+					displayWinColumns();
+				} else { // Everything else (aka Active Directory Auth)
+					iModel.data.filterFunction = _filterAdInformation;
+					displayAdColumns();
+				}
+				
+				update_view();
+				
+			}
+			
+			public function update_view() : void
+			{
+				iModel.data.refresh();
+			}
+			
+			private function _filterAvInformation(item : Object) : Boolean
+			{
+				var info :InformationVO = item as InformationVO;
+				
+				return (info.locationID == lModel.selectedLocation.id && info.data.TAB == "av");
+			}
+			
+			private function _filterAdInformation(item : Object) : Boolean
+			{
+				var info :InformationVO = item as InformationVO;
+				
+				return (info.locationID == lModel.selectedLocation.id && info.data.TAB == "ad");
+			}
+			
+			private function _filterWinInformation(item : Object) : Boolean
+			{
+				var info :InformationVO = item as InformationVO;
+				
+				return (info.locationID == lModel.selectedLocation.id && info.data.TAB == "win");
+			}
+			
+			private function clickHandler(event:ItemClickEvent):void {
+				iModel.data.filterFunction = _filterAvInformation; // Default filter
+				
+				// Default columns
+				//this.snortid.visible = true;
+				
+				if (event.label == "Active Directory") {
+					iModel.data.filterFunction = _filterAdInformation;
+					displayAdColumns();
+					//this.snortid.visible = false;
+				} else if (event.label == "Windows Updates") {
+					iModel.data.filterFunction = _filterWinInformation;
+					displayWinColumns();
+				} else {
+					displayAvColumns();
+				}
+				
+				update_view();
+			}
+			
+			/*
+			USER = uSER;
+			EVENTID = eVENTID;
+			LOGONTYPE = lOGONTYPE;
+			DESCRIPTION = dESCRIPTION;
+			STATUS = sTATUS;
+			UPDATE = uPDATE;
+			KB = kB;
+			CLASSIFICATION = cLASSIFICATION;
+			APPROVEDDATE = aPPROVEDDATE;
+			FILENAME = fILENAME;
+			RISKTYPE = rISKTYPE;
+			ACTION = aCTION;
+			ORIGINALLOCATION = oRIGINALLOCATION;
+			ACTIONDESCRIPTION = aCTIONDESCRIPTION;
+			*/
+			private function displayAdColumns() {
+				// SHOW
+				this.user.visible = true;
+				this.eventid.visible = true;
+				this.logontype.visible = true;
+				this.description.visible = true;
+				
+				// HIDE
+				this.filename.visible = false;
+				this.risktype.visible = false;
+				this.action.visible = false;
+				this.originallocation.visible = false;
+				this.actiondescription.visible = false;
+				this.kb.visible = false;
+				this.update.visible = false;
+				this.classification.visible = false;
+				this.status.visible = false;
+			}
+			
+			private function displayAvColumns() {
+				// SHOW
+				this.filename.visible = true;
+				this.risktype.visible = true;
+				this.action.visible = true;
+				this.originallocation.visible = true;
+				this.user.visible = true;
+				this.status.visible = true;
+				this.actiondescription.visible = true;
+				
+				// HIDE
+				this.eventid.visible = false;
+				this.logontype.visible = false;
+				this.kb.visible = false;
+				this.update.visible = false;
+				this.description.visible = false;
+				this.classification.visible = false;
+			}
+			
+			private function displayWinColumns() {
+				// SHOW
+				this.user.visible = true;
+				this.status.visible = true;
+				this.kb.visible = true;
+				this.update.visible = true;
+				this.classification.visible = true;
+				
+				// HIDE
+				this.filename.visible = false;
+				this.risktype.visible = false;
+				this.action.visible = false;
+				this.originallocation.visible = false;
+				this.eventid.visible = false;
+				this.logontype.visible = false;
+				this.actiondescription.visible = false;
+				this.description.visible = false;
+			}
+			
+		]]>
+	</fx:Script>
+		<s:VGroup>
+		</s:VGroup>
+
+		<s:DataGrid id="infoGridAv" x="1" y="29" width="100%" height="100%"
+					dataProvider="{iModel.data}" horizontalScrollPolicy="off"
+					resizableColumns="false" selectedIndex="0" sortableColumns="true"
+					textAlign="center">
+			<s:columns>
+				<s:ArrayList>
+					<s:GridColumn width="30" dataField="data" headerText="" itemRenderer="edu.psu.ist.neocities.component.InfoSelectRenderer" />
+					<s:GridColumn width="30" dataField="data.TAB" headerText="Alert Type" />
+					<s:GridColumn id="user" dataField="data.USER" headerText="Username" showDataTips="true" />
+					<s:GridColumn id="eventid" width="30" dataField="data.EVENTID" headerText="Event ID" />
+					<s:GridColumn id="logontype" dataField="data.LOGONTYPE" headerText="Logon Type" showDataTips="true" />
+					<s:GridColumn id="description" dataField="data.DESCRIPTION" headerText="Description" showDataTips="true" />
+					<s:GridColumn id="status" dataField="data.STATUS" headerText="Status" showDataTips="true" />
+					<s:GridColumn id="update" dataField="data.UPDATE" headerText="Update" showDataTips="true" />
+					<s:GridColumn id="kb" width="50" dataField="data.KB" headerText="KB #" />
+					<s:GridColumn id="classification" dataField="data.CLASSIFICATION" headerText="Classification" showDataTips="true" />
+					<s:GridColumn id="approveddate" dataField="data.APPROVEDDATE" headerText="Approve Date" />
+					<s:GridColumn id="filename" dataField="data.FILENAME" headerText="Filename" showDataTips="true" />
+					<s:GridColumn id="risktype" dataField="data.RISKTYPE" headerText="Risk Type" showDataTips="true" />
+					<s:GridColumn id="action" dataField="data.ACTION" headerText="Action" showDataTips="true" />
+					<s:GridColumn id="originallocation" dataField="data.ORIGINALLOCATION" headerText="Original Location" showDataTips="true" />
+					<s:GridColumn id="actiondescription" dataField="data.ACTIONDESCRIPTION" headerText="Action Description" showDataTips="true" />
+					<s:GridColumn dataField="data.DATE" headerText="Date" />
+					<s:GridColumn dataField="data.TIMESTAMP" headerText="Time" />
+					<!-- <s:GridColumn id="snortid" dataField="data.SNORTID" headerText="SnortID" />
+					<s:GridColumn width="200" dataField="data.SNORTDESCR" headerText="SnortDescr" /> -->
+					<s:GridColumn id="sourceip" dataField="data.SOURCEIP" headerText="Source IP" showDataTips="true" />
+					<!-- <s:GridColumn dataField="data.DESTIP" headerText="Dest IP" /> -->
+					<s:GridColumn width="30" dataField="data" headerText="" itemRenderer="edu.psu.ist.neocities.component.RemoveRenderer" />			
+				</s:ArrayList>
+			</s:columns>
+		</s:DataGrid>
+	<mx:ToggleButtonBar id="dataFilterButtonBar" x="1" y="5" horizontalGap="5" itemClick="clickHandler(event);"
+						selectedIndex="0" toggleOnClick="true">
+		
+		<mx:dataProvider>
+			<fx:String>Active Directory</fx:String>
+			<fx:String>Antivirus</fx:String>
+			<fx:String>Windows Updates</fx:String>
+		</mx:dataProvider>
+	</mx:ToggleButtonBar>
+
+
+</s:Panel>

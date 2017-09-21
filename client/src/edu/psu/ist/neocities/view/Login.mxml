@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Panel xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+	  	 width="500" height="380"
+		 title="Login"
+		 creationComplete="initView()">	
+	
+	<s:layout>
+		<s:VerticalLayout horizontalAlign="center" verticalAlign="middle" paddingBottom="15"/>
+	</s:layout>
+	
+	<fx:Script>
+	  	<![CDATA[
+			import com.pnwrain.easyCG.events.ControlEvent;
+			import com.pnwrain.easyCG.model.ModelFactory;
+			
+			import edu.psu.ist.neocities.model.PlayerModel;
+			import edu.psu.ist.neocities.model.RoleModel;
+			import edu.psu.ist.neocities.value.RoleVO;
+			
+			import mx.collections.ArrayCollection;
+			import mx.collections.ArrayList;
+			import mx.controls.Alert;
+			import mx.managers.PopUpManager;
+	  		 
+	  		[Bindable]
+	  		public var rModel : RoleModel = ModelFactory.getModel("RoleModel") as RoleModel;	
+	  		
+	  		[Bindable]
+	  		public var pModel : PlayerModel = ModelFactory.getModel("PlayerModel") as PlayerModel;
+	  		
+	  		private function initView() : void
+			{
+				PopUpManager.centerPopUp(this);
+				
+				this.isPopUp = false;
+			}
+	  		
+	  		private function checkUser() : void
+			{
+				var role : RoleVO;
+				var event2 : ControlEvent
+				
+				if (userName.text == "")
+				{
+					event2 = new ControlEvent('alert');
+					event2.data = "Please enter a username....";
+					event2.dispatch();
+				}
+				else if (userRole.selectedIndex != -1) {
+					
+					role = userRole.selectedItem as RoleVO;
+					if (!rModel.checkRole(role.role))
+					{							
+						var event : ControlEvent = new ControlEvent('evt_authenticate');
+						PopUpManager.removePopUp(this);
+						// this was changed
+						//Alert.show(userName.text + " " + role.role + " " + role.roleID.toString());
+						
+						event.data = new Array(userName.text, role.role, role.roleID); 
+						
+						event.dispatch();
+					}
+					else
+					{
+						event2  = new ControlEvent('alert');
+						event2.data = "I'm sorry somebody else has already logged in as that role...";
+						event2.dispatch();
+					}
+					
+				} else {
+					event2 = new ControlEvent('alert');
+					event2.data = "Please select a role";
+					event2.dispatch();
+				}
+				
+			}
+			
+			public function closePopUp() : void
+			{
+				PopUpManager.removePopUp(this);
+			}
+			
+	  	]]>
+	  </fx:Script>
+	<mx:Image source="edu/psu/ist/neocities/assets/NeoCitiesLogo.png"/>
+	<mx:Text x="10" y="10" text="Welcome to the NeoCities 3.0 Simulation!&#xa;&#xa;To begin the simulation, Please log in using your assigned role and User ID, which can be found on the Post-It note at your station..." width="100%" height="40%" fontWeight="bold" fontSize="13" />
+	
+	<s:VGroup width="100%" height="95" verticalAlign="middle" horizontalAlign="center" paddingBottom="2" >
+		<s:HGroup width="100%" verticalAlign="middle" horizontalAlign="center" height="100%" >
+			<s:Label text="User Name:" width="25%"  verticalAlign="middle" textAlign="center"/>
+			<s:TextInput id="userName" enter="checkUser()" tabIndex="1" width="50%"/>
+			
+		</s:HGroup>
+		
+		<s:HGroup width="100%" verticalAlign="middle" horizontalAlign="center" height="100%"  >
+			<s:Label text="Select Role:" width="25%" verticalAlign="middle" textAlign="center"/>
+			<s:DropDownList id="userRole" dataProvider="{rModel.data}" tabIndex="2" labelField="role" width="50%"  />
+			
+		</s:HGroup>	
+		<s:Button label="Login" click="checkUser()" tabIndex="3" width="50%" fontWeight="bold" fontSize="14"/>
+	</s:VGroup>
+	
+	
+	
+</s:Panel>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:GridItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009"
+					xmlns:s="library://ns.adobe.com/flex/spark"
+					xmlns:mx="library://ns.adobe.com/flex/mx"
+					clipAndEnableScrolling="true" contentBackgroundAlpha="0.0">
+	
+	<fx:Script>
+		<![CDATA[
+			import com.pnwrain.easyCG.events.ControlEvent;
+			
+			import edu.psu.ist.neocities.value.InformationVO;
+			
+			import mx.controls.Alert;
+			
+			protected function remove_information(info : InformationVO):void
+			{
+				var event :ControlEvent = new ControlEvent("evt_mc_removeInformation");
+				event.data = info;
+				
+				event.dispatch();
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<mx:LinkButton label="X" click="remove_information(data as InformationVO)" color="#FF0000"
+				   fontFamily="Arial" fontSize="18" fontWeight="bold" rollOverColor="#AC0000"
+				   skin="{null}"/>
+	
+</s:GridItemRenderer>

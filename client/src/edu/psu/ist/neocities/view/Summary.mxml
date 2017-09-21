@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Panel xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		  xmlns:util="edu.psu.ist.neocities.util.*" 
+		  minWidth="600" minHeight="400" maxHeight="600"
+		  title="Scenario Complete"
+		  creationComplete="initView()" >
+	<s:layout>
+		<s:VerticalLayout horizontalAlign="center" verticalAlign="middle" />
+	</s:layout>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.pnwrain.easyCG.events.ControlEvent;
+			import com.pnwrain.easyCG.model.ModelFactory;
+			
+			import edu.psu.ist.console.model.HistoryModel;
+			import edu.psu.ist.neocities.model.LocationModel;
+			import edu.psu.ist.neocities.model.RoleModel;
+			import edu.psu.ist.neocities.model.ScoreModel;
+			import edu.psu.ist.neocities.value.ScoreVO;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.controls.dataGridClasses.DataGridColumn;
+			import mx.formatters.NumberBase;
+			import mx.managers.PopUpManager;		
+			
+			[Bindable]
+			public var scoreModel : ScoreModel = ModelFactory.getModel('ScoreModel') as ScoreModel;		
+			
+			[Bindable]
+			public var locationModel :LocationModel = ModelFactory.getModel('LocationModel') as LocationModel;
+			
+			[Bindable]
+			private var nb : NumberBase = new NumberBase();	
+			
+			[Bindable]
+			private var pModel : RoleModel = ModelFactory.getModel("RoleModel") as RoleModel;	
+			
+			private function initView() : void
+			{
+				PopUpManager.centerPopUp(this);
+				
+				//Alert.show(""+scoreModel.data.length);
+				this.isPopUp = false;
+			}
+			
+			private function testView() : void
+			{   			
+	   			scoreModel.data = new ArrayCollection();
+	   			scoreModel.teamAverage = 48;
+	   			scoreModel.scenarioScore = 368;
+	   			
+	   			var score : ScoreVO = new ScoreVO();
+	   				score.normalScore = 50;
+	   				score.rawScore = 125;
+	   				score.worstScore = 250;
+	   				
+	   			scoreModel.data.addItem(score);
+	   			
+	   			var score2 : ScoreVO = new ScoreVO();
+	   				score2.normalScore = 68;
+	   				score2.rawScore = 80;
+	   				score2.worstScore = 250;
+	   				
+	   			scoreModel.data.addItem(score2);
+	   			
+	   			var score3 : ScoreVO = new ScoreVO();	
+	   				score3.normalScore = 35;
+	   				score3.rawScore = 162;
+	   				score3.worstScore = 250;
+	   				
+	   			scoreModel.data.addItem(score3);   
+				
+			}
+			
+			private function formatRawScore( item : Object, col:DataGridColumn) : String {
+				
+				var score : ScoreVO = item as ScoreVO;
+				
+				return nb.formatPrecision(score.rawScore.toString(), 0);
+			}
+			
+			
+			private function formatWorstScore( item : Object, col:DataGridColumn) : String {
+				
+				var score : ScoreVO = item as ScoreVO;
+				
+				return nb.formatPrecision(score.worstScore.toString(), 0);
+			}
+			
+			private function formatNormalScore( item : Object, col:DataGridColumn) : String {
+				
+				var score : ScoreVO = item as ScoreVO;
+				
+				return nb.formatPrecision(score.normalScore.toString(), 0) + "%";
+			}
+			
+			private function getIncidentLabel ( item : Object, col:DataGridColumn ) : String {
+				var score : ScoreVO = item as ScoreVO;
+				
+				//var incident : IncidentVO = iModel.getIncident(score.incidentID.toString());
+				
+				return "";
+			}
+			
+			private function getIncidentStatus( item : Object, col:DataGridColumn ) : String {
+				var score : ScoreVO = item as ScoreVO;
+				
+				// var incident : IncidentVO = iModel.getIncident(score.incidentID.toString());
+				
+				return "";
+			}
+			
+		]]>
+	</fx:Script>
+	
+ <!--===============================================================================\
+   | View States
+ \================================================================================-->	
+
+ <!--===============================================================================\
+   | U.I. Code
+ \================================================================================-->
+    
+		<s:BorderContainer width="100%" height="100%" borderVisible="false">
+			<s:layout>
+				<s:VerticalLayout />
+			</s:layout>
+			
+			<s:Label text="Event Scores" />
+			
+			<s:BorderContainer width="100%" borderVisible="false">
+				<s:layout>
+					<s:HorizontalLayout horizontalAlign="center" />
+				</s:layout>
+			
+				<s:VGroup width="33%" horizontalAlign="center">
+					<s:Label text="Overall Score:" fontWeight="bold" fontSize="14"/>
+					<s:Label text="{nb.formatPrecision(scoreModel.teamAverage.toString(), 0)}%" fontWeight="bold" fontSize="36"/>
+					<s:Label text="Higher is Better" fontSize="10"/>							
+				</s:VGroup>
+				<s:VGroup width="33%" horizontalAlign="center">
+					<s:Label text="Total Damage:" fontWeight="bold" fontSize="14"/>
+					<s:HGroup verticalAlign="top">
+						<s:Label text="{nb.formatPrecision(scoreModel.scenarioScore.toString(), 0)}" fontWeight="bold" fontSize="36"/>
+						<s:Label text=" / {nb.formatPrecision(scoreModel.scenarioTotal.toString(), 0)}" />	
+					</s:HGroup>			
+					<mx:Label text="Lower is Better" fontSize="10"/>							
+				</s:VGroup>
+				
+			</s:BorderContainer>
+			
+			<s:Label text="Event Scores:" fontWeight="bold" fontSize="14" />
+			
+		    <mx:DataGrid id="scoreGrid" 
+				width="100%" height="100%" 
+				dataProvider="{scoreModel.data}"
+				rowHeight="50"
+				
+				sortableColumns="false"
+	        	resizableColumns="false"
+	        	draggableColumns="false"    
+				>
+		    	<mx:columns>
+		    		
+		    		<mx:DataGridColumn headerText="Location"
+						dataField="locationID"
+		    			textAlign="left" width="150"
+		    			/>
+					
+					
+					<mx:DataGridColumn headerText="Event Description"
+									   dataField="eventLabel"
+									   textAlign="left" width = "200" />
+					
+		    		 <mx:DataGridColumn headerText="Status" 
+		    			textAlign="center" width="50"
+						dataField="status"
+		    			
+		    			/>    	
+					<!--itemRenderer="edu.psu.ist.neocities.component.summaryStatus"-->
+		    			    	   			    	   	
+		    		<mx:DataGridColumn headerText="Score"
+		    		    width="25"
+		    		   	labelFunction="formatNormalScore" 
+		    			textAlign="center" 
+		    			/>  
+		    		<mx:DataGridColumn headerText="Damage" 
+		    		    width="100"
+		    			textAlign="center"
+						dataField="rawScore"
+		    		   
+		    			/>	<!--itemRenderer="edu.psu.ist.neocities.component.BarScore"--> 
+		    		 				
+		    	</mx:columns>
+		    </mx:DataGrid>
+    		
+    	</s:BorderContainer>    	
+
+</s:Panel>

@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:HGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 >
+	
+	<fx:Style>
+		@namespace s "library://ns.adobe.com/flex/spark";
+		@namespace mx "library://ns.adobe.com/flex/halo";
+		
+		s|List  {
+			horizontalScrollPolicy: off;
+			verticalScrollPolicy: off;
+		}
+	</fx:Style>
+
+	<fx:Script>
+		<![CDATA[
+			import com.pnwrain.easyCG.events.ControlEvent;
+			import com.pnwrain.easyCG.model.ModelFactory;
+			
+			
+			import edu.psu.ist.neocities.model.*;
+			import edu.psu.ist.neocities.oldValue.*;
+			
+			import edu.psu.ist.neocities.value.*;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.controls.DataGrid;
+			import mx.events.FlexEvent;
+			
+			/*[Bindable]
+			private var iModel : IncidentModel = ModelFactory.getModel("IncidentModel") as IncidentModel;	  		*/
+			
+			[Bindable]
+			private var rModel : ResourceModel = ModelFactory.getModel("ResourceModel") as ResourceModel;
+			
+			[Bindable]				
+			private var pModel : RoleModel = ModelFactory.getModel("RoleModel") as RoleModel;
+			
+			[Bindable]
+			private var uModel : UnitModel = ModelFactory.getModel("UnitModel") as UnitModel;	
+			
+			private var selectedEvent : String;
+			
+			private var pendingUnits : ArrayCollection;			
+			
+			public function initView() : void {	  		
+				/*setSelectedEvent("no incident selected");
+				resetView();*/			
+				
+			}
+			public function resetView() : void
+			{
+				//Alert.show("we are here");
+				resourceList.dataProvider = new ArrayCollection();
+				resourceList.dataProvider = pModel.currentPlayer.resources;
+			}
+			
+			private function getResourceLabel ( item : Object) : String {            	
+				var unit : UnitVO = item as UnitVO;
+				var resource : ResourceVO = rModel.getResource(unit.resourceID.toString());
+				var label : String;
+				label = "#" + unit.badgeNo;
+				
+				return label;            	
+			}
+			
+			private function getResourceIcon ( item : Object) : Class {            	
+				var unit : UnitVO = item as UnitVO;
+				return rModel.getIcon(unit.resourceID.toString(), true);            	
+			}
+			
+			/*
+			dragEnabled="true"
+			dragMoveEnabled="true"
+			dropEnabled="true" */
+			
+			
+
+			protected function resourceList_creationCompleteHandler(event:FlexEvent):void
+			{
+				resourceList.scroller.setStyle("horizontalScrollPolicy", "off");
+				resourceList.scroller.setStyle("verticalScrollPolicy", "off");
+			}
+
+		]]>
+	</fx:Script>
+
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:HGroup height="100%" width="5%" />
+	<s:Label text="Resources:  " verticalAlign="middle" height="100%"  fontWeight="bold" fontSize="15"/>
+	<s:List
+		id = "resourceList"
+		dataProvider="{pModel.currentPlayer.resources}" 
+		itemRenderer="edu.psu.ist.neocities.component.OldComponent.DispatchLabelSmall"		
+		allowMultipleSelection="true"
+		selectionColor="#FFFFFF"
+		borderVisible="false"
+		 creationComplete="resourceList_creationCompleteHandler(event)"
+		width="100%"
+		height = "100%"
+		>							
+		
+		<s:layout>
+			<s:TileLayout requestedRowCount="1" horizontalAlign="center"  />			
+		</s:layout>	
+		
+	</s:List>
+	<s:HGroup height="100%" width="5%" />
+</s:HGroup>

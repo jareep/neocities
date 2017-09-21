@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<s:Panel xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 xmlns:ns1="edu.psu.ist.neocities.view.*"
+		 width="100%" height="100%"		  
+		 creationComplete="initView()" 
+		 >
+	<s:layout>
+		<s:VerticalLayout  verticalAlign="top" horizontalAlign="center" />
+	</s:layout>  
+	
+	<fx:Script>
+		<![CDATA[
+			import com.degrafa.geometry.HorizontalLine;
+			import com.degrafa.geometry.Line;
+			import com.pnwrain.easyCG.events.ControlEvent;
+			import com.pnwrain.easyCG.model.ModelFactory;
+			
+			import edu.psu.ist.console.value.QuestionHistoryVO;
+			import edu.psu.ist.neocities.model.PauseModel;
+			import edu.psu.ist.neocities.model.TimeModel;
+			import edu.psu.ist.neocities.value.QuestionAnswerVO;
+			import edu.psu.ist.neocities.value.QuestionVO;
+			
+			import flash.events.TimerEvent;
+			import flash.net.navigateToURL;
+			import flash.system.Capabilities;
+			import flash.utils.Timer;
+			
+			import mx.controls.Alert;
+			import mx.controls.Button;
+			import mx.controls.HRule;
+			import mx.managers.PopUpManager;	
+			
+			[Bindable]
+			private var pModel : PauseModel = ModelFactory.getModel("PauseModel") as PauseModel;
+			
+			[Bindable]
+			private var tModel : TimeModel = ModelFactory.getModel("TimeModel") as TimeModel;
+			
+			private var baseTimer:int;
+			
+			private var pauseTimer : Timer;
+			
+			private var curQuestion :QuestionVO;
+			
+			private var qhVO : QuestionHistoryVO;
+			
+			private function initView() : void
+			{	
+				this.height = Capabilities.screenResolutionY - 10;
+				this.width = Capabilities.screenResolutionX;
+				
+				test.width = Capabilities.screenResolutionX;
+				test.height = Capabilities.screenResolutionY - 200;
+				
+				PopUpManager.centerPopUp(this);
+				
+				this.displayQuestion();
+				
+				this.isPopUp = false;
+				
+				this.startTimer();			
+			}
+			
+			public function displayQuestion() : void
+			{
+				this.curQuestion = pModel.pause.getNextQuestion();
+				this.questionContainer.removeAllElements();
+				
+				if (this.pModel.pause.questionList == null || this.pModel.pause.questionList.length == 0)
+				{
+					this.message.visible = true;
+				}
+				else
+				{
+					if (pModel.pause.isIntro && (pModel.pause.questionList.getItemAt(0) as QuestionVO).type == "INTRO")
+					{
+						this.questionContainer.addElement((pModel.pause.questionList.getItemAt(0) as QuestionVO).getQuestionUI());
+						this.introTimer();
+						pModel.pause.isIntro = false;
+					}
+					else { pModel.pause.isIntro = false; 
+					
+						this.questionContainer.removeAllElements();
+						
+						var hRule :HRule;
+					
+						for each (var question:QuestionVO in this.pModel.pause.questionList)
+						{
+							question.qhVO = new QuestionHistoryVO();
+							question.qhVO.questionTime = tModel.masSec;
+							question.qhVO.questionId = question.questionID;
+							
+							if (question.type == "SA") { question.qhVO.correct = -9999; }
+							
+							this.questionContainer.addElement(question.getQuestionUI());
+							
+							hRule = new HRule();
+							hRule.width = 400;
+							
+							this.questionContainer.addElement(hRule);
+							
+						}
+					}
+				}
+				
+			}
+			
+			public function introTimer() : void
+			{
+				var introTimer : Timer = new Timer((pModel.pause.introSec * 1000), 1);
+
+				introTimer.start();
+				introTimer.addEventListener(TimerEvent.TIMER_COMPLETE, introComplete);
+			}
+			
+			
+			public function introComplete (event : TimerEvent) : void
+			{
+				//this.sendQH(tModel.masSec, true);
+				this.displayQuestion();
+			}
+			
+			public function startTimer() : void {				
+				//start Timer based on PauseDuration
+				pauseTimer = new Timer(pModel.pause.pauseDuration, 1);
+				pauseTimer.start();
+				
+				pauseTimer.addEventListener(TimerEvent.TIMER_COMPLETE, timerComplete);			
+			}
+			
+			private function timerComplete( event : TimerEvent ) : void 
+			{				
+				this.submitAnswers();
+				
+				PopUpManager.removePopUp(this);  	
+			}
+			
+			private function submitAnswers () : void 
+			{
+				var event2 : ControlEvent;
+				for each (var question:QuestionVO in this.pModel.pause.questionList)
+				{
+					if (question.type != "INTRO")
+					{
+						event2 = new ControlEvent('evt_sendQuestionAnswer');
+						event2.data = question.qhVO;
+						event2.dispatch();
+					}
+				}
+			}	
+					
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<mx:DateFormatter id="dateFormatter" formatString="NN:SS" />
+	</fx:Declarations>
+	
+	<!--===============================================================================\
+	| U.I. Code
+	\================================================================================-->
+	
+	<!--<mx:TextArea width="100%" wordWrap="true" text="{pModel.pause.msg}"  fontSize="12" borderStyle="none" editable="false"/>-->
+	<mx:Label id="message" visible="false" selectable="true" htmlText="{pModel.pause.link}"  fontSize="16" fontWeight="bold"/>
+	
+		<s:Group id="test" width="500" height="90%"  >
+		
+			<s:Scroller id="scroller" width="100%" height="100%">
+				<s:VGroup horizontalScrollPosition="0"
+						 verticalScrollPosition="0" id="questionContainer" horizontalAlign="center" paddingBottom="15">
+					
+				</s:VGroup>
+			</s:Scroller>
+		</s:Group>
+
+	
+
+</s:Panel>

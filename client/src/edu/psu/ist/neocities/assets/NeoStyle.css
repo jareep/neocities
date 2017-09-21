@@ -1,0 +1,32 @@
+/* CSS file */
+@namespace s "library://ns.adobe.com/flex/spark";
+@namespace mx "library://ns.adobe.com/flex/mx";
+
+
+
+s|Panel
+{
+	cornerRadius:5;
+	chromeColor: #CCCDE0;
+	dropShadowVisible:true;
+
+
+}
+
+mx|LinkButton
+{
+	rollOverColor: #FFFFFF;
+	selectionColor:#FFFFFF;
+	textRollOverColor:#FFFFFF;
+	textSelectedColor:#FFFFFF;
+	focusColor:#FFFFFF;
+	accentColor:#FFFFFF;
+}
+
+s|Button
+{
+	cornerRadius:3;
+}
+
+
+	

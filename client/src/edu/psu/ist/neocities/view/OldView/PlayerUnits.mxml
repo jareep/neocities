@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:BorderContainer xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 creationComplete="initView()"
+		 width="100%" height="100%">
+	<s:layout>
+		<s:HorizontalLayout />
+	</s:layout>
+	
+	 <fx:Script>
+		<![CDATA[				
+			import edu.psu.ist.neocities.value.*;
+			import edu.psu.ist.neocities.model.*;
+			import edu.psu.ist.neocities.oldValue.*;
+			import edu.psu.ist.neocities.oldModel.*;
+			import com.pnwrain.easyCG.model.ModelFactory;
+			import com.pnwrain.easyCG.events.ControlEvent;
+			import mx.collections.ArrayCollection;
+														
+			[Bindable]
+			private var pModel : RoleModel = ModelFactory.getModel("RoleModel") as RoleModel;
+										
+			public function initView(): void {
+				//blank
+			}			
+														
+		]]>
+	</fx:Script>
+		
+	<mx:DataGrid id="unitReportsGrid" 
+		width="100%" height="100%" rowHeight="60" 
+		dataProvider="{pModel.currentPlayer.dispatchedUnits}" 
+				    
+    	sortableColumns="false"
+	    draggableColumns="false" 
+		>
+    	<mx:columns>
+    		<!--itemRenderer="edu.psu.ist.neocities.component.unitLabel"-->
+    		<mx:DataGridColumn headerText="Unit"
+    			dataField="icon" 
+    			width="40"     			 
+    			textAlign="center"
+				itemRenderer="edu.psu.ist.neocities.component.OldComponent.unitLabel"
+    		    />
+    		
+    		  <mx:DataGridColumn headerText="Status"
+    			dataField="status" 
+    			width="100"  
+    			wordWrap="true" 
+    			textAlign="center" />
+    		
+    		<mx:DataGridColumn headerText="Field Report"
+    			dataField="playerMessage" 
+    			wordWrap="true" 
+    			textAlign="left"  />
+    		
+			<!--itemRenderer="edu.psu.ist.neocities.component.incidentLabel"-->
+    		<mx:DataGridColumn headerText="Current Location"
+    			dataField="incidentID"  
+    			textAlign="center" 
+    			width="280"
+				itemRenderer="edu.psu.ist.neocities.component.OldComponent.incidentLabel"
+    		     />
+    			        		
+    	</mx:columns>
+    </mx:DataGrid>
+	
+	
+		
+	
+</s:BorderContainer>
+

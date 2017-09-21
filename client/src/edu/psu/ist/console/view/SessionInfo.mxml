@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   width="388" height="300" 
+			   title="SessionStart"
+			   close="removeMe()"
+			   creationComplete="initView()">
+	<fx:Declarations>
+		
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.pnwrain.easyCG.events.ControlEvent;
+			import com.pnwrain.easyCG.model.ModelFactory;
+			
+			import edu.psu.ist.console.model.ScenarioModel;
+			import edu.psu.ist.console.model.SessionModel;
+			import edu.psu.ist.console.value.SessionVO;
+			
+			import mx.controls.Alert;
+			import mx.managers.PopUpManager;
+			
+			
+
+			[Bindable]
+			public var sModel :SessionModel = ModelFactory.getModel("SessionModel")  as SessionModel;
+			
+			private function initView() : void
+			{
+				
+				this.closeButton.visible = true;
+				
+				PopUpManager.centerPopUp(this);	
+				
+				var serverEvent : ControlEvent = new ControlEvent('evt_serverData');
+				serverEvent.dispatch();		
+				
+				if (sModel.sessionInfo.debug)
+				{
+					var scenario :ScenarioModel = ModelFactory.getModel("ScenarioModel") as ScenarioModel;
+					sModel.sessionInfo.scenario = "xxx";
+					this.startScenario();
+					return;
+				}
+				
+				//evt_initClient
+				
+				sModel.clearModel();
+				
+				
+			}
+			
+			private function removeMe() : void
+			{
+				PopUpManager.removePopUp(this);
+				
+				var event : ControlEvent = new ControlEvent('evt_resetServer');
+				event.dispatch();		
+			}
+			
+
+			
+			private function checkInputs() : void
+			{
+				var cont : Boolean = true;
+								
+				
+				if (rsh.text == "")
+				{
+					rsh.setStyle("contentBackgroundColor", "#FF0000");
+					
+					cont = false;
+				}
+				else
+				{
+					rsh.setStyle("contentBackgroundColor", "#FFFFFF");
+				}
+					
+				if (tID.text == "" || isNaN(Number(tID.text)))
+				{
+					tID.setStyle("contentBackgroundColor", "#FF0000");
+					cont = false;
+				}
+				else
+				{
+					tID.setStyle("contentBackgroundColor", "#FFFFFF");
+				}
+
+				/*
+				if (lc.selectedIndex == -1)
+				{
+					
+					lc.setStyle("chromeColor", "#FF0000");
+					cont = false;
+				}
+				else
+				{
+					lc.setStyle("chromeColor", "#cccde0");
+				}	
+				
+				if (d.selectedIndex == -1)
+				{
+					d.setStyle("chromeColor", "#FF0000");
+					cont = false;
+				}
+				else
+				{
+					d.setStyle("chromeColor", "#cccde0");
+				}	*/
+				
+				
+				if (cont == false)
+				{
+					Alert.show("Please enter correct values in red");
+					return;
+				}
+				else
+				{
+					this.populateSessionInfo();
+					this.startScenario();
+				}
+				
+			}
+			
+			private function setTime(call : String) : void
+			{
+				if (call == "h")
+				{
+					this.hl.text = this.getNF(hour.value.toString());
+				}
+				else
+				{
+					this.ml.text = this.getNF(min.value.toString());
+				}
+					
+			}
+			
+			private function getNF (ms : String) : String
+			{
+				if (ms.length == 1)
+				{
+					return "0" + ms;
+				}
+				
+				return ms;
+			}
+			
+			private function populateSessionInfo() : void
+			{
+				var time : String = this.hl.text + ":" + this.ml.text + " " + this.ampm.selectedItem;
+				var scenario :ScenarioModel = ModelFactory.getModel("ScenarioModel") as ScenarioModel;
+								
+				this.sModel.populateSessionInfo(this.rsh.text, "xxx", "xxx", time, 
+												this.tID.text, scenario.activeScenarioName, "xxx", scenario.activeEnvironmentName);
+			}
+			
+			private function startScenario() : void
+			{
+				//this.serviceCall('simStart'); 
+				
+				//this.clearScenarioData();
+				
+				PopUpManager.removePopUp(this);
+				
+				//var event : ControlEvent = new ControlEvent('evt_scenarioStart');
+				var event : ControlEvent = new ControlEvent('evt_initComplete');
+				event.dispatch();
+			}
+			
+			/****************************************************************
+			 * Data Service Event Calls
+			 ****************************************************************/
+			
+			private function serviceCall( msg : String) : void 
+			{	
+				trace(msg);
+				var event : ControlEvent = new ControlEvent('evt_serverCall');
+				event.data = msg;
+				event.dispatch();			
+			}
+			
+			
+			private function clearScenarioData() : void {
+				var event : ControlEvent = new ControlEvent('evt_clearData');
+				event.dispatch();
+			}
+		]]>
+	</fx:Script>
+	
+	
+	<s:VGroup width="100%" height="100%" paddingBottom="10" paddingLeft="10" paddingTop="10" paddingRight="10"> 
+		<s:Label text="Please fill out the following information before starting the scenario:" width="100%"  fontWeight="bold"/>
+		<s:HGroup width="100%" height="20%" verticalAlign="middle" paddingRight="1" paddingLeft="1">
+			<s:Label text="Researcher" width="30%" />
+			<s:TextInput id="rsh" width="70%" />
+		</s:HGroup>
+		
+		<s:HGroup width="100%" height="20%" verticalAlign="middle" paddingRight="1" paddingLeft="1">
+			<s:Label text="Participant ID" width="30%" />
+			<s:TextInput id="tID" width="70%"  />
+		</s:HGroup>
+		
+		<s:HGroup width="100%" height="20%" verticalAlign="middle" paddingRight="1" paddingLeft="1">
+			<s:Label text="Session Start Time" width="30%" />
+			
+						
+			<s:Label id="hl" width="10%" textAlign="right"/>
+			<s:Spinner id="hour" minimum="1" maximum="12" change="{this.setTime('h')}" creationComplete="{this.setTime('h')}" allowValueWrap="true"/>
+			
+			<s:Label id="ml" width="10%" textAlign="right"/>
+			<s:Spinner id="min" minimum="0" maximum="59" snapInterval="10" change="{this.setTime('m')}" creationComplete="{this.setTime('m')}" allowValueWrap="true"/>
+			
+			<s:DropDownList id="ampm" width="25%" selectedIndex="1">
+				<s:dataProvider>
+					<s:ArrayList>
+						<fx:String>AM</fx:String>
+						<fx:String>PM</fx:String>
+					</s:ArrayList>
+				</s:dataProvider>
+			</s:DropDownList>
+		</s:HGroup>
+		
+		<!--
+		<s:HGroup width="100%" height="20%" verticalAlign="middle" paddingRight="1" paddingLeft="1">
+			<s:Label text="Condition" width="30%" />
+			<s:DropDownList id="c" width="70%" >
+				<s:dataProvider>
+					<s:ArrayList>
+						<fx:Object label="NeoCITIES Individual Group (NC I G)" value="NC I G" />
+						<fx:Object label="NeoCITIES No-Individual Group (NC NI G)" value="NC NI G" />
+						<fx:Object label="NeoCITIES Individual No-Group (NC I NG)" value="NC I NG" />
+						<fx:Object label="Control Individual Group (C I G)" value="C I G" />
+						<fx:Object label="Control No-Individual Group (C NI G)" value="C NI G" />
+						<fx:Object label="Control Individual No-Group (C I NG)" value="C I NG" />
+					</s:ArrayList>
+				</s:dataProvider>
+			</s:DropDownList>
+		</s:HGroup>
+		
+		<s:HGroup width="100%" height="20%" verticalAlign="middle" paddingRight="1" paddingLeft="1">
+			<s:Label text="Location" width="30%" />
+			<s:DropDownList id="lc" width="70%">
+				<s:dataProvider>
+					<s:ArrayList>
+						<fx:String>IST</fx:String>
+						<fx:String>KLR</fx:String>
+					</s:ArrayList>
+				</s:dataProvider>
+			</s:DropDownList>
+		</s:HGroup>
+		
+		<s:HGroup width="100%" height="20%" verticalAlign="middle" paddingRight="1" paddingLeft="1">
+			<s:Label text="Division" width="30%" />
+			<s:DropDownList id="d" width="70%">
+				<s:dataProvider>
+					<s:ArrayList>
+						<fx:String>1</fx:String>
+						<fx:String>2</fx:String>
+					</s:ArrayList>
+				</s:dataProvider>
+			</s:DropDownList>
+		</s:HGroup>
+		-->
+		
+		
+		<s:Button label="Start Scenario:" width="100%" click="checkInputs()"/>
+	</s:VGroup>
+</s:TitleWindow>

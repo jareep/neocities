@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" width="225" height="200">
+	
+	<fx:Script>
+		<![CDATA[
+		
+		import com.pnwrain.easyCG.model.ModelFactory;
+		import com.pnwrain.easyCG.events.ControlEvent;
+		import edu.psu.ist.neocities.oldModel.ResourceModel;
+		import edu.psu.ist.neocities.value.UnitVO;
+		import mx.managers.PopUpManager;
+		
+		[Bindable]
+		private var rModel : ResourceModel = ModelFactory.getModel("ResourceModel") as ResourceModel;
+		
+		private function getResourceIcon ( resourceID : String, available : Boolean) : Class {            									    	
+		//ignore the Available status when using the dispatchedUnits AC		    	
+		return rModel.getIcon(resourceID, true);            	
+		}
+		
+		[Bindable]			
+		public var unit : UnitVO;
+		
+		public function initComponent(): void {				 
+		PopUpManager.centerPopUp(this);			
+		}
+		
+		private function removeMe():void {
+		PopUpManager.removePopUp(this);              
+		}
+		
+		private function recallUnit() : void {
+		
+		var event : ControlEvent = new ControlEvent('evt_recallUnit');
+		event.data = unit;
+		event.dispatch();
+		
+		PopUpManager.removePopUp(this);   
+		}
+		
+		]]>
+		</fx:Script>
+	
+	<s:TitleWindow 
+	    title="Unit Recall"
+		close="removeMe()"
+		mouseDownOutside="removeMe()"
+	   	creationComplete="initComponent()" 
+		width="100%" height="100%"
+	    borderAlpha="1"
+		>
+		
+		<s:BorderContainer width="100%" height="100%">
+			<s:layout>
+				<s:VerticalLayout horizontalAlign="center" verticalAlign="middle" />
+			</s:layout>	
+		
+			<mx:Text text="Do you want to recall this unit?" textAlign="left"/>
+			
+			<mx:LinkButton 
+				icon = "{getResourceIcon(unit.resourceID.toString(), unit.available)}"
+				enabled="false" 
+		 		disabledColor="#000000" color="#000000"
+		 	    toolTip="{unit.status}"
+			/>
+			<mx:Text text="#{unit.badgeNo}" />
+			
+			<s:HGroup horizontalAlign="center" paddingTop="3" paddingBottom="3" paddingLeft="3" paddingRight="3">
+				<mx:Button label="Yes!" width="50" click="recallUnit();" color="#138B21"/>
+				<mx:Button label="No" width="50" click="removeMe();" color="#AA1A13"/>
+			</s:HGroup>
+		</s:BorderContainer>
+		
+	</s:TitleWindow>
+</s:ItemRenderer>

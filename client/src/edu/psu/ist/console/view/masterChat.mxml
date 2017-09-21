@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Panel
+	xmlns:ns1="net.goozo.mx.dockable.*" 
+	xmlns:fx="http://ns.adobe.com/mxml/2009"
+	xmlns:s="library://ns.adobe.com/flex/spark"
+	xmlns:mx="library://ns.adobe.com/flex/mx"
+	width="100%" height="100%"
+	title="Master Chat"
+	creationComplete="chatConsumer.subscribe()" xmlns:view="edu.psu.ist.neocities.view.*">
+	
+	<fx:Script>
+	<![CDATA[
+		import com.pnwrain.easyCG.events.ControlEvent;
+		import com.pnwrain.easyCG.model.ModelFactory;
+		
+		import edu.psu.ist.console.model.ChatModel;
+		import edu.psu.ist.console.value.TimelineVO;
+		import edu.psu.ist.neocities.model.*;
+		import edu.psu.ist.neocities.oldModel.*;
+		import edu.psu.ist.neocities.value.RoleVO;
+		
+		import mx.controls.Alert;
+		import mx.messaging.events.MessageAckEvent;
+		import mx.messaging.events.MessageEvent;
+		import mx.messaging.events.MessageFaultEvent;
+		import mx.messaging.messages.AsyncMessage;
+		import mx.messaging.messages.IMessage;
+		import mx.rpc.events.FaultEvent;
+		import mx.rpc.events.ResultEvent;
+		
+		[Bindable]
+		private var pModel : RoleModel = ModelFactory.getModel("RoleModel") as RoleModel;
+		
+		[Bindable]
+		public var tModel : TimeModel = ModelFactory.getModel("TimeModel") as TimeModel;
+		
+		[Bindable]
+		public var cModel : ChatModel = ModelFactory.getModel("ChatModel") as ChatModel;
+				
+		private var chatString : String = '';
+					
+		//private function handleFaults(event:MessageFaultEvent):void{
+		//	Alert.show(event.message.body.toString());
+		//}
+		
+		private function masterSend():void{
+			var message:IMessage = new AsyncMessage();
+			message.headers = new Array();
+			message.headers["userName"] = "Admin";
+			message.headers["sender"] = "Commander ";
+			message.body = msg.text;
+			chatProducer.send(message);
+			msg.text = "";
+			
+			
+		}
+			
+		private function handleResponse(event:MessageEvent):void{
+			trace(event.message);
+			var newMessage : String;
+			log.htmlText += "<font color='#000000'><b>" + event.message.headers["sender"] + "</b>[" + event.message.headers["userName"] + "](" + tModel.simTime + "):</font> " + event.message.body + "\n";
+
+			if (event.message.headers["sender"] == "HazMat "){
+				log.htmlText += "<font color='#00CC33'><b>" + event.message.headers["sender"] + "</b>[" + event.message.headers["userName"] + "](" + tModel.simTime + "):</font> " + event.message.body + "\n";}
+			if (event.message.headers["sender"] == "Police "){
+				log.htmlText += "<font color='#0033FF'><b>" + event.message.headers["sender"] + "</b>[" + event.message.headers["userName"] + "](" + tModel.simTime + "):</font> " + event.message.body + "\n";}
+			if (event.message.headers["sender"] == "Fire/EMS "){
+				log.htmlText += "<font color='#CC0000'><b>" + event.message.headers["sender"] + "</b>[" + event.message.headers["userName"] + "](" + tModel.simTime + "):</font> " + event.message.body + "\n";}
+			if (event.message.headers["sender"] == "Commander "){
+				log.htmlText += "<font color='#000000'><b>" + event.message.headers["sender"] + "</b>[" + event.message.headers["userName"] + "](" + tModel.simTime + "):</font> " + event.message.body + "\n";}
+				
+				log.validateNow();
+                log.verticalScrollPosition = log.maxVerticalScrollPosition; //autoScroll to Bottom
+            
+			newMessage = event.message.headers["sender"] + "[" + event.message.headers["userName"] + "] (" + tModel.simTime + "): " + event.message.body + "\n";
+				
+			cModel.text+=newMessage;
+			
+			if (event.message.headers["sender"] != "Commander")
+			{
+				cModel.addUtterance(event.message.headers["sender"], event.message.body.toString());
+	            chatString+= newMessage;
+			}
+			
+			var tlVO :TimelineVO = new TimelineVO()
+			tlVO.type = "chat";
+			tlVO.message = newMessage.replace("\n", "");
+			
+			var tlEvent : ControlEvent = new ControlEvent('evt_logTimeline');
+			tlEvent.data = tlVO;
+			tlEvent.dispatch();
+		
+
+		}
+		
+	]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<mx:Consumer id="chatConsumer" 
+			destination="chat" 
+			message="handleResponse(event)"
+			channelConnect="trace(event)" 
+	    	channelFault="trace(event)" 
+	    	fault="trace(event)" 
+	    	/>
+		
+		<mx:Producer id="chatProducer" 
+			destination="chat"
+			channelConnect="trace(event)" 
+	    	channelFault="trace(event)" 
+	    	fault="trace(event)"
+			/>
+	</fx:Declarations>
+	
+ <!--===============================================================================\
+   | U.I. Code
+ \================================================================================-->	
+		
+	<s:BorderContainer borderVisible="false" width="100%" height="100%" >
+		<s:layout>
+			<s:VerticalLayout paddingRight="5" paddingBottom="5" paddingLeft="5" paddingTop="5" />
+		</s:layout>
+		<s:VGroup width="100%" height="100%">
+			<mx:TextArea id="log" width="100%" height="100%" editable="false" text="" wordWrap="true"/>
+			
+			<s:HGroup width="100%">
+				<mx:TextInput id="msg" width="100%" enter="masterSend()"/>
+				<mx:Button label="Send" click="masterSend()" id="button1"/>
+				<mx:Button label="Copy" click="{System.setClipboard(chatString)}" />	
+			</s:HGroup>			
+		</s:VGroup>
+	</s:BorderContainer>
+
+</s:Panel>

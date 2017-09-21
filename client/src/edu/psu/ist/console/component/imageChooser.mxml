@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- containers\layouts\myComponents\ArrayEntryFormEvents.mxml 
+This function is not used at all... It was initially for the scenario designer, but that is no longer used
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml"
+    showCloseButton="true" 
+    width="350" height="325" 
+    borderAlpha="1">
+ 
+    <mx:Script>
+        <![CDATA[
+            import mx.managers.PopUpManager;
+            
+            import com.pnwrain.easyCG.model.ModelFactory;	
+            import edu.psu.ist.neocities.model.ImageModel;
+            
+            // Variables whose values are set by the main application.
+            // Data provider array for the component's ComboBox control.
+                        
+            [Bindable]
+			private var imageModel : ImageModel = ModelFactory.getModel("ImageModel") as ImageModel;
+			
+			public function useIncidentIcons() : void {
+				imageModel.populateIconArray();
+				imageTileList.dataProvider = imageModel.incidentIcons;	
+				imageTileList.iconFunction = getIncidentIcon;
+			}
+			
+			public function getIncidentIcon( item : Object ) : Class {
+				return imageModel.getIncidentIcon( item.filename as String );
+			}
+			            
+        ]]>
+    </mx:Script>
+
+    <mx:TileList id="imageTileList"  
+       labelField="label"       
+       width="100%" height="100%"
+       allowMultipleSelection="false"
+       columnWidth="75"       
+       columnCount="4" 
+       rowHeight="100"
+       wordWrap="true"
+       selectedIndex="0"        
+    	/>
+    <mx:HBox>
+        <mx:Button id="okButton" label="OK"/>
+        <mx:Button id="cancelButton" label="Cancel"/>
+    </mx:HBox>
+</mx:TitleWindow>-->

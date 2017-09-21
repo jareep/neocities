@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Panel xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		  width="500" height="400"
+		  creationComplete="initView()"
+		  title = "Welcome to NeoCities 3.0" >
+	<s:layout>
+		<s:VerticalLayout horizontalAlign="center" verticalAlign="middle"/>
+	</s:layout>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.pnwrain.easyCG.events.ControlEvent;
+			import mx.managers.PopUpManager;
+				
+					
+			private function initView() : void
+			{
+				/*var event : ControlEvent = new ControlEvent('evt_subscribe');
+					event.data = "Subscribe to BlazeDS Data Feeds";
+					event.dispatch();*/	
+				PopUpManager.centerPopUp(this);
+				
+				this.isPopUp = false;
+
+			}
+		
+			public function closePopup(  ) : void {				
+				
+					PopUpManager.removePopUp(this);
+	
+			}	
+			
+		
+
+			
+		]]>
+	</fx:Script>
+
+	<s:Label id="loading" x="252" y="148" text="Loading Scenario...." fontSize="13"/>
+	<mx:Image source="edu/psu/ist/neocities/assets/NeoCitiesLogo.png"/>
+	
+</s:Panel>

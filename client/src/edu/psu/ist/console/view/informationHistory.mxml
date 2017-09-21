@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:NavigatorContent	label="Information History"
+					xmlns:fx="http://ns.adobe.com/mxml/2009"
+					xmlns:s="library://ns.adobe.com/flex/spark"
+					xmlns:mx="library://ns.adobe.com/flex/mx"
+					xmlns:util="edu.psu.ist.neocities.util.*" 
+					width="100%" height="100%"
+					creationComplete="initView();">
+	<s:layout>
+		<s:VerticalLayout />
+		
+	</s:layout>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.pnwrain.easyCG.model.ModelFactory;
+			
+			import edu.psu.ist.console.model.HistoryModel;
+			import edu.psu.ist.console.value.ActionHistoryVO;
+			import edu.psu.ist.neocities.oldModel.IncidentModel;
+			import edu.psu.ist.neocities.oldModel.ResourceModel;
+			import edu.psu.ist.neocities.model.RoleModel;
+			import edu.psu.ist.neocities.oldModel.UnitModel;
+			import edu.psu.ist.neocities.oldValue.IncidentVO;
+			import edu.psu.ist.neocities.value.ResourceVO;
+			import edu.psu.ist.neocities.value.RoleVO;
+			import edu.psu.ist.neocities.value.UnitVO;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.controls.dataGridClasses.DataGridColumn;
+			import mx.formatters.NumberBase;
+			
+			[Bindable]
+			public var hModel : HistoryModel = ModelFactory.getModel("HistoryModel") as HistoryModel;
+			
+			[Bindable]
+			public var uModel : UnitModel = ModelFactory.getModel("UnitModel") as UnitModel;
+			
+			[Bindable]
+			public var rModel : ResourceModel = ModelFactory.getModel("ResourceModel") as ResourceModel;
+			
+			[Bindable]
+			public var iModel : IncidentModel = ModelFactory.getModel("IncidentModel") as IncidentModel;    
+			
+			[Bindable]
+			public var pModel : RoleModel = ModelFactory.getModel("RoleModel") as RoleModel;
+			
+			private function initView() : void {
+				
+			}
+			
+			private function formatEventName(item : Object, col:DataGridColumn) : String
+			{
+				var actionHistory : ActionHistoryVO = item as ActionHistoryVO;
+				
+				return getEventName(actionHistory.eventID);
+			}
+			
+			private function getEventName (id : int) : String
+			{
+				var incident : IncidentVO = iModel.getIncident(id.toString());
+				
+				return incident.label
+			}
+			
+			private function formatResourceName(item : Object, col:DataGridColumn) : String
+			{
+				var actionHistory : ActionHistoryVO = item as ActionHistoryVO;
+				
+				return getResourceName(actionHistory.resourceID);
+			}
+			
+			private function getResourceName (id : int) : String
+			{
+				var resource : ResourceVO = rModel.getResource(id.toString());
+				
+				return resource.label;
+			}
+			
+			private function formatRoleName(item : Object, col:DataGridColumn) : String
+			{
+				var actionHistory : ActionHistoryVO = item as ActionHistoryVO;
+				
+				
+				
+				return getRoleName(actionHistory.roleID);
+			}
+			
+			private function getRoleName (id : int) : String
+			{
+				var role : RoleVO = pModel.getPlayer(id);
+				
+				return role.role
+			}
+			
+			private function formatTimeStep(item : Object, col:DataGridColumn) : String
+			{
+				var actionHistory : ActionHistoryVO = item as ActionHistoryVO;
+				var timeStep : int;
+				
+				switch (col.dataField)
+				{
+					case "eventTime":
+						timeStep = int(actionHistory.eventTime);
+						break;
+					case "actionTime":
+						timeStep = int(actionHistory.actionTime);
+						break;
+					case "reactionTime":
+						timeStep = int(actionHistory.reactionTime);
+						break;
+				}
+				
+				
+				timeStep = timeStep * 3;
+				
+				
+				return timeStep.toString();          
+				
+			}
+			
+			private function autoScrollTextArea():void {
+				actions.validateNow();
+				actions.verticalScrollPosition = actions.maxVerticalScrollPosition;                
+			}
+			
+			private function copyToClipBoard() : void 
+			{
+				var copy : String = "";
+				
+				copy += "Action Time" + "\t";
+				copy += "Action" + "\t";
+				copy += "Role" + "\t";
+				copy += "Resource" + "\t";
+				copy += "Badge No." + "\t";
+				copy += "Event" + "\t";
+				copy += "Event Time" + "\t";
+				copy += "Reaction Time" + "\n";
+				
+				for each (var item : ActionHistoryVO in hModel.actionHistory)
+				{
+					copy += int(item.actionTime) * 3 + "\t";
+					copy += item.action + "\t";
+					copy += getRoleName(item.roleID) + "\t";
+					copy += getResourceName(item.resourceID) + "\t";
+					copy += item.badgeNo + "\t";
+					copy += getEventName(item.eventID) + "\t";
+					copy += int(item.eventTime) * 3 + "\t";
+					copy += int(item.reactionTime) * 3 + "\n";
+				} 
+				
+				System.setClipboard(copy);
+				
+			}          
+		]]>
+	</fx:Script>
+	
+	<mx:DataGrid id="actions" 
+				 
+				 width="100%" height="100%" 
+				 dataProvider="{hModel.informationHistory}"
+				 updateComplete="autoScrollTextArea()"
+				 sortableColumns="false"
+				 horizontalScrollPolicy="on"
+				 focusIn="autoScrollTextArea()">
+		
+		
+		<mx:columns>
+			
+			<mx:DataGridColumn headerText="Role"
+							   dataField="roleID"
+							   textAlign="center"
+							   width="100" />
+			<mx:DataGridColumn headerText="Information"
+							   dataField="informationID"
+							   textAlign="center"
+							   width="100" />
+			<mx:DataGridColumn headerText="Location"
+							   dataField="locationID"
+							   textAlign="center"
+							   width="100" />
+			<mx:DataGridColumn headerText="Recipient"
+							   dataField="recipientID"
+							   textAlign="center"
+							   width="100" />
+			<mx:DataGridColumn headerText="Action"
+							   dataField="action"
+							   textAlign="center"
+							   width="100" />
+			<mx:DataGridColumn headerText="Dispatch Time"
+							   dataField="infoTime"
+							   textAlign="center"
+							   width="100" />
+			<mx:DataGridColumn headerText="Action Time"
+							   dataField="actionTime"
+							   textAlign="center"
+							   width="100" />
+			<mx:DataGridColumn headerText="Reaction Time"
+							   dataField="reactionTime"
+							   textAlign="center"
+							   width="100" />
+			<mx:DataGridColumn headerText="Returned"
+							   dataField="returned"
+							   textAlign="center"
+							   width="100" />
+			<mx:DataGridColumn headerText="Correct"
+							   dataField="correctAction"
+							   textAlign="center"
+							   width="100" />
+		</mx:columns>
+		
+		
+	</mx:DataGrid>
+	<s:Button label="Copy to ClipBoard" click="copyToClipBoard()" />
+</s:NavigatorContent>

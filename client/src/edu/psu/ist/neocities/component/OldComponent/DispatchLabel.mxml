@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" width="50" height="50" rollOverColor="#FFFFFF"
+		 mouseDown="dragHandler(event)"
+		 >
+
+	<s:layout>
+		<s:VerticalLayout horizontalAlign="center" />
+	</s:layout>		
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[    		
+			import com.pnwrain.easyCG.events.ControlEvent;
+			import com.pnwrain.easyCG.model.ModelFactory;
+			
+			import edu.psu.ist.neocities.oldModel.ResourceModel;
+			import edu.psu.ist.neocities.value.UnitVO;
+			
+			import mx.controls.Alert;
+			import mx.core.DragSource;
+			import mx.core.IUIComponent;
+			import mx.managers.DragManager;
+		
+		[Bindable]
+		private var rModel : ResourceModel = ModelFactory.getModel("ResourceModel") as ResourceModel;
+		
+		private function getResourceIcon ( resourceID : String, available : Boolean) : Class {            									    	
+		//ignore the Available status when using the dispatchedUnits AC		    	
+			return rModel.getIcon(resourceID, true);          	
+		}
+
+			protected function dragHandler(event:MouseEvent):void
+			{
+				//Alert.show("here");
+				var di :IUIComponent = event.currentTarget as IUIComponent;
+				var ds :DragSource = new DragSource();
+				
+				ds.addData(this.data, "UnitVO");
+				DragManager.doDrag(di, ds , event);
+			}
+
+		]]>
+	</fx:Script>	
+	
+
+		<mx:LinkButton 
+			icon = "{getResourceIcon(data.resourceID, data.available)}"
+			width="0"
+			enabled="true" 
+			toolTip="Drag me...."
+			mouseDown="dragHandler(event)"
+			skin="{null}"
+			/>
+		<mx:Text text="#{data.badgeNo}" />
+
+</s:ItemRenderer>

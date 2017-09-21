@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:NavigatorContent label="Test view"
+					xmlns:fx="http://ns.adobe.com/mxml/2009"
+					xmlns:s="library://ns.adobe.com/flex/spark"
+					xmlns:mx="library://ns.adobe.com/flex/mx"
+					xmlns:net="flash.net.*"
+					width="100%" height="100%" 
+					creationComplete="initView();">
+	<s:layout>
+		<s:VerticalLayout />
+	</s:layout>
+	
+	
+	<fx:Script>
+		<![CDATA[
+			import com.pnwrain.easyCG.model.ModelFactory;
+			
+			import edu.psu.ist.console.model.*;
+			import edu.psu.ist.console.value.MessageVO;
+			import edu.psu.ist.console.value.TimelineVO;
+			import edu.psu.ist.neocities.model.ScoreModel;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			
+			
+			[Bindable]
+			public var hModel : HistoryModel = ModelFactory.getModel("HistoryModel") as HistoryModel;
+			//public var mModel : MessageModel = ModelFactory.getModel("MessageModel") as MessageModel;
+			
+			
+			private function autoScrollTextArea():void {
+		//		console2.validateNow();
+		//		console2.verticalScrollPosition = console2.maxVerticalScrollPosition;                
+			}
+			
+			private function initView() : void {
+
+				//default
+			}
+			
+
+			
+		]]>
+	</fx:Script>
+	
+	
+	<!--mx:DataGrid id="console2" 
+				 width="100%" height="100%" 
+				 dataProvider="{hModel.messageArray}"
+				 updateComplete="autoScrollTextArea()"
+				 focusIn="autoScrollTextArea()"
+				 variableRowHeight="true">
+		<mx:columns>
+			<mx:DataGridColumn headerText="Message Dump" width="50" textAlign="center" 
+							   dataField="msgText" wordWrap="true"/>
+		</mx:columns>
+	</mx:DataGrid-->	
+</s:NavigatorContent>

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--This function is not used at all... It was initially for the scenario designer, but that is no longer used
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" textAlign="center" verticalAlign="middle">
+	
+	<mx:Script>
+		<![CDATA[
+		
+		import com.pnwrain.easyCG.model.ModelFactory;
+
+		import edu.psu.ist.neocities.model.ResourceModel;
+		import edu.psu.ist.neocities.value.ResourceVO;
+		
+		[Bindable]
+		private var rModel : ResourceModel = ModelFactory.getModel("ResourceModel") as ResourceModel;		
+   
+		
+		private function getResourceIcon ( item : Object) : Class {            	
+			var resourceID : String = item.toString();
+			
+        	return rModel.getIcon(resourceID, true);            	
+        }
+        
+        private function getResourceLabel ( item : Object) : String {            	
+			var resourceID : String = item.toString();
+			
+        	return rModel.getResourceLabel(resourceID);            	
+        }
+        
+		]]>
+	</mx:Script>
+
+	<mx:LinkButton icon="{rModel.getIcon(data.resourceID, true)}" label="{rModel.getResourceLabel(data.resourceID)}"
+	 	enabled="false" 
+	 	disabledColor="#000000"
+		/>	
+
+
+<!--
+<mx:List
+dataProvider="{data.resourceID}" 							    
+labelFunction="getResourceLabel"
+iconFunction="getResourceIcon"
+borderThickness="0"
+width="100%" height="100%"
+paddingTop="0" paddingBottom="0"
+selectable="false" 
+horizontalScrollPolicy="off"
+verticalScrollPolicy="off" 
+/>
+
+-->
+
+</mx:HBox> -->
+
+	
+

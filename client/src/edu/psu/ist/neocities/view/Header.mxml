@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:HGroup 	xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 			xmlns:s="library://ns.adobe.com/flex/spark"
+		 			xmlns:mx="library://ns.adobe.com/flex/mx" 
+					width="100%" height="5%">
+
+	
+	<fx:Script>
+		<![CDATA[		
+			import com.pnwrain.easyCG.model.ModelFactory;
+			
+			import edu.psu.ist.neocities.model.TimeModel;
+			import edu.psu.ist.neocities.model.RoleModel;
+						
+			[Bindable]
+			public var tModel : TimeModel = ModelFactory.getModel("TimeModel") as TimeModel;
+			
+			[Bindable]				
+			private var pModel : RoleModel = ModelFactory.getModel("RoleModel") as RoleModel;
+			
+			public function setBanner() : void
+			{
+				roleImage.source = getBanner();
+			}
+													
+			private function getBanner() : String
+			{
+				// This function serves as a temoporaty solution to displaying the banner for each role until 
+				// the data model itself can be changed to support it...
+				var location : String = pModel.currentPlayer.icon;
+								
+				return location.replace(".gif", "_banner.png");
+			}
+		
+		]]>
+	</fx:Script>
+	
+	<s:HGroup horizontalAlign="left" width="20%" >
+		<!--  -->
+		<mx:Image id="roleImage" width="200" height="50" />
+ 	</s:HGroup>
+	
+	<s:HGroup width="60%" horizontalAlign="center" verticalAlign="bottom" >
+ 		<s:Label text="{tModel.simTime}" 
+ 			fontSize="36" 
+ 			textAlign="center" 
+ 			color="#FFFFFF"/>
+	</s:HGroup>	
+ 
+
+	<s:HGroup horizontalAlign="right" width="20%">
+		<mx:Image id="ncLogo" 
+				  width="200" height="50"
+				  horizontalAlign="left" 
+				  source ="edu/psu/ist/neocities/assets/NeoCitiesLogo.png" />
+	</s:HGroup>
+ 
+	
+</s:HGroup>

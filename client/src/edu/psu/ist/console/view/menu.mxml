@@ -1,0 +1,386 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" 
+	width="100%" 
+	label="Console Commands" verticalAlign="middle" creationComplete="hbox1_creationCompleteHandler(event)">
+	
+	<!--This will need to be updated to flex 4, it will take a while -->
+	
+	<mx:Script>
+		<![CDATA[
+			import com.pnwrain.easyCG.events.ControlEvent;
+			import com.pnwrain.easyCG.model.ModelFactory;
+			
+			import edu.psu.ist.console.model.MessageModel;
+			import edu.psu.ist.console.model.ScenarioModel;
+			import edu.psu.ist.console.model.SessionModel;
+			import edu.psu.ist.console.value.ScenarioVO;
+			import edu.psu.ist.neocities.model.*;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			
+		[Bindable]
+		public var tModel : TimeModel; 
+		
+		[Bindable]
+		private var scenarioModel : ScenarioModel;
+		
+		[Bindable]
+		private var mModel : MessageModel;
+			
+		private var debug : Boolean = false;
+		
+		private var environment:FileReference;
+		private var scenario:FileReference;
+		private var filter : FileFilter;
+		
+		
+		/****************************************************************
+	     * View State Event Calls
+	     ****************************************************************/		
+		protected function hbox1_creationCompleteHandler(event:FlexEvent):void
+		{
+			this.addEventListener(KeyboardEvent.KEY_DOWN, setDebug);
+		}
+			
+		public function init() : void
+		{
+			var sModel :SessionModel = ModelFactory.getModel("SessionModel") as SessionModel;
+			tModel = ModelFactory.getModel("TimeModel") as TimeModel;
+			scenarioModel = ModelFactory.getModel("ScenarioModel") as ScenarioModel;
+			mModel = ModelFactory.getModel("MessageModel") as MessageModel;
+			
+			environment = new FileReference();
+			environment.addEventListener(Event.SELECT, env_select);
+			environment.addEventListener(Event.COMPLETE, loadEnvironmentFile);
+			
+			scenario = new FileReference();
+			scenario.addEventListener(Event.SELECT, scen_select);
+			scenario.addEventListener(Event.COMPLETE, loadScenarioFile);
+			
+			filter = new FileFilter("XML", "*.xml");
+			
+			//debug = true;
+			
+			//sModel.setAsDebug();
+		}
+			
+		public function stop () : void
+		{
+			this.serverStop();
+		}
+			
+		private function setDebug(evt :KeyboardEvent) : void
+		{
+			var sModel :SessionModel = ModelFactory.getModel("SessionModel") as SessionModel;
+			
+			if (evt.ctrlKey && evt.shiftKey && evt.keyCode == 90)
+			{
+				if (debug)
+				{
+					Alert.show("Now Leaving Debug Mode...");
+					debug = false;
+					
+					sModel.clearModel();
+				}
+				else
+				{
+					Alert.show("Debug Mode... To exit press Control - Alt Z");
+					debug = true;
+					
+					sModel.setAsDebug();
+				}
+			}
+			
+		}
+		private function changeStateRequest( _msg : String ) : void
+		{
+			var event : ControlEvent = new ControlEvent('evt_StateChange');
+			event.data =  _msg;
+			dispatchEvent(event);				
+		}
+		
+		private function selectTab( _msg : String ) : void
+		{
+			var event : ControlEvent = new ControlEvent('evt_TabSelect');
+			event.data =  _msg;
+			dispatchEvent(event);				
+		}
+				
+		/****************************************************************
+	     * Data Service Event Calls
+	     ****************************************************************/
+		
+		
+		private function serviceCall( msg : String) : void 
+		{
+			var event : ControlEvent = new ControlEvent('evt_serverCall');
+			event.data = msg;
+			dispatchEvent(event);			
+		}
+		
+		private function clearScenarioData() : void {
+			var event : ControlEvent = new ControlEvent('evt_clearData');
+			dispatchEvent(event);
+		}
+			
+	
+		
+		/****************************************************************
+	     * Console State Changes
+	     ****************************************************************/
+			        
+        private function serverStart() : void {
+			
+			var event : ControlEvent = new ControlEvent('evt_subscribeAll');
+			dispatchEvent(event);
+			
+			var event : ControlEvent = new ControlEvent('evt_subscribeConsole');
+			dispatchEvent(event);
+			
+        	this.changeStateRequest('serverStart'); 
+        	this.serviceCall('serverStart'); 
+        	this.currentState='serverStart';
+          
+        }
+        
+        private function serverStop() : void {
+			
+			var event : ControlEvent = new ControlEvent('evt_unsubscribe');
+			dispatchEvent(event);
+			
+			var event : ControlEvent = new ControlEvent('evt_unsubscribeConsole');
+			dispatchEvent(event);	
+			
+			
+        	this.serviceCall('serverStop'); 
+        	this.currentState='';        	
+        }
+        
+        private function initScenario() : void {
+               	        	   	
+        	var event : ControlEvent = new ControlEvent('evt_initialize');
+        	dispatchEvent(event);  
+        	
+        } 
+			
+			private function scenarioStart() : void {
+				
+				this.changeStateRequest('scenarioStart');
+				this.currentState='scenarioStart';
+				
+				this.serviceCall('simStart'); 
+				
+				this.clearScenarioData();
+				
+				//var event : ControlEvent = new ControlEvent('evt_sessionInfo');
+				var event : ControlEvent = new ControlEvent('evt_scenarioStart');
+				event.dispatch();
+				
+			}
+        
+  
+        
+        public function changeToScenarioState() : void {
+        	this.changeStateRequest('scenarioStart');
+        	this.currentState='scenarioStart';
+        }  
+        
+        public function changeToServerStartState() : void {
+        	this.serverStart();
+        	
+        }   
+        
+        public function check_init(event : CloseEvent) : void {
+        	if (event.detail == Alert.OK)
+        	{
+        		this.initScenario();
+        	}
+        }
+			
+		public function override_init() : void {
+			this.initScenario();
+			
+			
+		}
+		//	<!--Alert.show('You have selected ' +  scenarioModel.activeScenario.label + ', is that correct?', 'Confirm', Alert.OK|Alert.CANCEL,this,check_init,null,Alert.OK)-->	
+	
+					
+		private function loadEnvironmentFile(evt:Event) : void
+		{
+			var envData :String = environment.data.readUTFBytes(environment.data.length);
+								
+			var event : ControlEvent = new ControlEvent("evt_cc_loadEnvironment");
+			event.data = envData;
+			dispatchEvent(event); 
+			
+			
+		}
+			
+		private function loadScenarioFile(evt:Event) : void
+		{
+			var scnData :String = scenario.data.readUTFBytes(scenario.data.length);
+			
+			
+			var event : ControlEvent = new ControlEvent("evt_cc_loadScenario");
+			event.data = scnData;
+			dispatchEvent(event); 
+		}
+			
+		/****************************************************************
+		 * File Reference Functions
+		 ****************************************************************/
+        	
+		private function env_select(evt:Event):void {
+				try {
+					
+					environment.load();
+				} catch (err:Error) {
+					Alert.show("ERROR: zero-byte file");
+				}
+			}
+		
+		private function scen_select(evt:Event): void {
+			try {
+				
+				scenario.load();
+			} catch (err:Error) {
+				Alert.show("ERROR: zero-byte file");
+			}
+		}
+
+		]]>
+	</mx:Script>
+	
+<!--===============================================================================\
+   | View States
+ \================================================================================-->
+ 
+	<mx:states>
+
+	<mx:State name="serverStart">				
+		<!-- Left Items -->
+		<mx:SetProperty target="{startServerLink}" name="enabled" value="true"/>
+		<mx:SetEventHandler target="{startServerLink}" name="click" handler="serverStop()"/>
+		<mx:SetProperty target="{startServerLink}" name="label" value="Stop Server"/>
+		<mx:SetProperty target="{waitLabel}" name="text" value="Server Online:"/>
+		<mx:SetStyle target="{waitLabel}" name="textAlign" value="right"/>
+		<!-- Center Items -->
+		
+		<mx:SetProperty target="{ae}" name="visible" value="true"/>
+		<mx:SetProperty target="{activeS}" name="visible" value="true"/>
+		<mx:SetProperty target="{blank}" name="visible" value="true"/>
+		<mx:SetProperty target="{loadEnvironment}" name="visible" value="true"/>
+		<mx:SetProperty target="{loadScenario}" name="visible" value="true"/>
+		<mx:SetProperty target="{startScenario}" name="visible" value="true"/>
+		
+		<mx:SetStyle target="{startServerLink}" name="color" value="#AE2727"/>
+		<!-- Right Items -->
+		<mx:SetProperty target="{timeStep}" name="visible" value="true"/>
+		<mx:SetProperty target="{timeLabel}" name="visible" value="true"/>
+		<mx:SetProperty target="{gameTime}" name="visible" value="true"/>
+		
+	</mx:State>
+	
+	<mx:State name="scenarioStart" basedOn="serverStart">					
+		
+		<mx:RemoveChild target="{loadEnvironment}"/>
+		<mx:RemoveChild target="{loadScenario}"/>
+		
+		<mx:SetStyle target="{startServerLink}" name="color" value="#AE2727"/>	 
+ 		<!--<mx:SetProperty target="{scenarioLabel}" name="text" value="Active Scenario:"/>-->
+ 		 
+ 		<mx:AddChild position="lastChild" relativeTo="{centerBox}">
+ 	 		<mx:Label id="activeLabel"
+ 	 			text="{scenarioModel.activeScenario.label}"  
+ 	 			fontWeight="bold"  
+ 	 			paddingLeft="15"
+ 	 			/>
+ 	 	</mx:AddChild> 		 	 
+ 	 	
+	</mx:State>
+			
+	</mx:states>
+	
+ <!--===============================================================================\
+   | U.I. Code
+ \================================================================================-->
+	
+	<mx:HBox id="leftBox" width="33%" horizontalAlign="left" verticalAlign="middle">
+		<mx:Label id="waitLabel" 
+			text="Please Start The Server:" 
+			width="160" 
+			color="#FFFFFF"
+			 fontWeight="bold"/>
+		<mx:Button id="startServerLink" 
+			label="Start Server" 		
+			color="#27AD30" 
+			click="serverStart()"
+		    minWidth="100"
+			/>
+	</mx:HBox>
+		
+	<mx:HBox id="centerBox" width="33%" horizontalAlign="center" verticalAlign="middle">						
+		<mx:VBox>
+			
+			<mx:Label id="ae" text="{scenarioModel.activeEnvironmentName}" fontWeight="bold" 
+					  visible="false"/>
+			<mx:Button id="loadEnvironment" 
+				label="Load Environment File" 		
+				click="{environment.browse([filter]);}"
+				minWidth="100"
+				visible="false"
+			
+				/>
+		</mx:VBox>
+		
+		<mx:VBox>
+			
+			<mx:Label id="activeS" text="{scenarioModel.activeScenarioName}" fontWeight="bold" visible="false"/>
+			<mx:Button id="loadScenario" 
+					   label="Load Scenario File" 		
+					   click="{scenario.browse([filter]);}"
+					   minWidth="100"
+					   visible="false"
+					   
+					   />
+		</mx:VBox>
+		
+		<mx:Label id="blank" text="" fontWeight="bold" visible="false" />
+		<mx:Button id = "startScenario"
+				   label = "Start Scenario"
+				   click = "{initScenario();}"
+				   minWidth = "100"
+				   visible = "false" />
+		
+		
+			
+			<!---initScenario()-->
+	</mx:HBox>				
+	
+	<mx:HBox id="rightBox" width="33%" horizontalAlign="right" verticalAlign="middle">
+		<mx:Label id="timeStep" 
+			text="{mModel.timeStep}" 
+			color="#FFFFFF" 
+			visible="false" 
+			/>
+		<mx:Label id="timeLabel"
+			text="Game Time:"  
+			fontWeight="bold"
+			fontSize="16"  
+			color="#FFFFFF" 
+			visible="false"
+			/>
+		<mx:Label id="gameTime" 
+			text="{tModel.simTime}" 
+			fontWeight="bold" 
+			fontSize="18" 
+			color="#FFFFFF" 
+			visible="false"
+	 	/>
+	</mx:HBox>	
+
+			
+</mx:HBox>

@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Panel xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 width="100%"
+		 title="Chat"	  
+		 height="100%"
+		 creationComplete="chatConsumer.subscribe()"
+		 >
+	<s:layout>
+		<s:HorizontalLayout paddingRight="5" paddingBottom="5" paddingLeft="5" paddingTop="5" />
+	</s:layout>
+	
+	<fx:Style>
+		@namespace s "library://ns.adobe.com/flex/spark";
+		@namespace mx "library://ns.adobe.com/flex/mx";
+		
+		.wordWrap {
+			lineBreak: toFit;
+		}
+		
+	</fx:Style>
+	
+	<fx:Script>
+		<![CDATA[
+		
+			import com.pnwrain.easyCG.events.ControlEvent;
+			import com.pnwrain.easyCG.model.ModelFactory;
+			
+			import edu.psu.ist.neocities.model.*;
+			import edu.psu.ist.neocities.oldModel.*;
+			import edu.psu.ist.neocities.value.PlayerVO;
+			import edu.psu.ist.neocities.value.RoleVO;
+			
+			import flashx.textLayout.conversion.TextConverter;
+			import flashx.textLayout.elements.SpanElement;
+			
+			import mx.controls.Alert;
+			import mx.messaging.events.MessageAckEvent;
+			import mx.messaging.events.MessageEvent;
+			import mx.messaging.events.MessageFaultEvent;
+			import mx.messaging.messages.AsyncMessage;
+			import mx.messaging.messages.IMessage;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.utils.StringUtil;
+			
+			//import org.osmf.html.HTMLElement;
+			
+			import spark.utils.TextFlowUtil;
+						
+			[Bindable]
+			public var tModel : TimeModel = ModelFactory.getModel("TimeModel") as TimeModel;
+			
+			[Bindable]
+			private var pModel : RoleModel = ModelFactory.getModel("RoleModel") as RoleModel;
+			
+			public var chatWindow : String = "";
+			
+			//private function handleFaults(event:MessageFaultEvent):void{
+			//	Alert.show(event.message.body.toString());
+			//}
+			
+			private function send():void{
+				var message:IMessage = new AsyncMessage();
+				message.headers = new Array();
+				message.headers["userName"] = pModel.currentPlayer.userName;
+				
+				message.body = new PlayerVO();
+				
+				trace(pModel.currentPlayer.role.toLowerCase());
+				
+				if (pModel.currentPlayer.role.toLowerCase() == "hazmat"){
+					message.headers["sender"] = "HazMat ";}
+				if (pModel.currentPlayer.role.toLowerCase() == "police"){
+					message.headers["sender"] = "Police ";}
+				if (pModel.currentPlayer.role.toLowerCase() == "fire"){
+					message.headers["sender"] = "Fire/EMS ";}
+				if (pModel.currentPlayer.role.toLowerCase() == "av analyst"){
+					message.headers["sender"] = "Antivirus Analyst ";}
+				if (pModel.currentPlayer.role.toLowerCase() == "win analyst"){
+					message.headers["sender"] = "Windows Analyst ";}
+				if (pModel.currentPlayer.role.toLowerCase() == "ad analyst"){
+					message.headers["sender"] = "Active Directory Analyst ";}
+				
+				message.body = stripHTML(msg.text);
+				chatProducer.send(message);
+				msg.text = "";
+			}
+			
+			private function masterSend():void{
+				var message:IMessage = new AsyncMessage();
+				message.headers = new Array();
+				message.headers["userName"] = "Admin";
+				message.headers["sender"] = "Commander ";
+				message.body = msg.text;
+				chatProducer.send(message);
+				msg.text = "";
+			}
+			
+			private function handleResponse(event:MessageEvent):void{
+				trace(event.message);
+				
+				
+				
+				if (event.message.headers["sender"] == "HazMat " || event.message.headers["sender"] == "Antivirus Analyst "){
+					//spark.utils.TextFlowUtil.importFromString
+					this.chatWindow+="<span color='#00CC33' fontWeight='bold'>" + event.message.headers["sender"] + "[" + event.message.headers["userName"] + "](" + tModel.simTime + "):</span> " + event.message.body + "<br />";
+				}
+				if (event.message.headers["sender"] == "Police " || event.message.headers["sender"] == "Windows Analyst "){
+					this.chatWindow += "<span color='#0033FF' fontWeight='bold'>" + event.message.headers["sender"] + "[" + event.message.headers["userName"] + "](" + tModel.simTime + "):</span> " + event.message.body + "<br />";
+				}
+				if (event.message.headers["sender"] == "Fire/EMS " || event.message.headers["sender"] == "Active Directory Analyst "){
+					this.chatWindow += "<span color='#CC0000' fontWeight='bold'>" + event.message.headers["sender"] + "[" + event.message.headers["userName"] + "](" + tModel.simTime + "):</span> " + event.message.body + "<br />";
+				}
+				if (event.message.headers["sender"] == "Commander "){
+					this.chatWindow += "<span color='#000000' fontWeight='bold'>" + event.message.headers["sender"] + "[" + event.message.headers["userName"] + "](" + tModel.simTime + "):</span> " + event.message.body + "<br />";
+				}
+				
+				log.textFlow = spark.utils.TextFlowUtil.importFromString(this.chatWindow);
+				log.validateNow();
+				
+				log.scroller.verticalScrollBar.value = log.scroller.verticalScrollBar.maximum;
+				
+				
+				pModel.chat+= event.message.headers["sender"] + "[" + event.message.headers["userName"] + "] (" + tModel.simTime + "): " + event.message.body + "\n";
+			}
+			
+			private function stripHTML(text : String) : String
+			{
+				var myPattern: RegExp = /<[^>]*>/g;
+				
+				return text.replace(myPattern,"");
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		
+	
+		<mx:Consumer id="chatConsumer" 
+					 destination="chat" 
+					 message="handleResponse(event)"
+					 channelConnect="trace(event)" 
+					 channelFault="trace(event)" 
+					 fault="trace(event)" 
+					 />
+		
+		<mx:Producer id="chatProducer" 
+					 destination="chat"
+					 channelConnect="trace(event)" 
+					 channelFault="trace(event)" 
+					 fault="trace(event)"
+					 />
+	
+	</fx:Declarations>
+	<!--===============================================================================\
+	| View States
+	\================================================================================-->
+	
+	<s:states>
+		
+		<s:State name="master" />			
+		<!--
+		<mx:SetEventHandler target="{msg}" name="enter" handler="masterSend()"/>
+		<mx:SetEventHandler target="{button1}" name="click" handler="masterSend()"/>	
+		-->
+		
+		
+	</s:states>
+	
+	<!--===============================================================================\
+	| U.I. Code
+	\================================================================================-->	
+	
+	
+
+		<s:VGroup width="100%" height="100%">
+			<s:TextArea id="log" width="100%" height="100%" editable="false" text="" styleName="wordWrap"/>
+			
+			<s:HGroup width="100%">
+				  <s:TextInput id="msg" width="100%" enter="send()"/>
+				<s:Button label="Send" click="send()" id="button1"/>	
+			</s:HGroup>			
+		</s:VGroup>
+		
+		<!--
+		<s:BorderContainer width="20%" height="100%" >
+			<s:layout>
+				<s:VerticalLayout horizontalAlign="center" />
+			</s:layout>
+			
+			<mx:DataGrid dataProvider="{pModel.team}" height="25%" width="100%">
+				<mx:columns>
+					<mx:DataGridColumn headerText="Teammates" dataField="userName"/>
+				</mx:columns>
+			</mx:DataGrid>
+			<mx:Button label="Filter Chat" width="102"/>
+		</s:BorderContainer>-->
+		
+
+</s:Panel>
+

@@ -1,0 +1,54 @@
+@CHARSET "ISO-8859-1";
+@namespace s "library://ns.adobe.com/flex/spark";
+@namespace mx "library://ns.adobe.com/flex/halo";
+@namespace "library://ns.adobe.com/flex/spark";
+
+s|Panel {
+	borderThicknessLeft: 0;
+	borderThicknessTop: 0;
+	borderThicknessBottom: 2;
+	borderThicknessRight: 0;
+	cornerRadius:10;
+	headerColors: #99ccff, #999999;
+	chromeColor
+}
+
+s|LinkButton
+{
+	rollOverColor: "#FFFFFF";
+	accentColor: "#FFFFFF";
+	selectedUpSkin: "null";
+	selectedOverSkin: "null";
+	selectedDownSkin: "null";
+	upSkin: "null";
+	downSkin: "null";
+	
+}
+
+s|List
+{
+	userRollOver: "false";
+	skin: "null";
+	rollOverColor: "#FFFFFF";
+	accentColor: "#FFFFFF";
+	selectedUpSkin: "null";
+	selectedOverSkin: "null";
+	selectedDownSkin: "null";
+	upSkin: "null";
+	downSkin: "null";
+	
+}
+
+s|ItemRenderer
+{
+	userRollOver: "false";
+	skin: "null";
+	rollOverColor: "#FFFFFF";
+	accentColor: "#FFFFFF";
+	selectedUpSkin: "null";
+	selectedOverSkin: "null";
+	selectedDownSkin: "null";
+	upSkin: "null";
+	downSkin: "null";
+}
+

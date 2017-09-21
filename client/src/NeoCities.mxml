@@ -1,0 +1,309 @@
+<s:Application
+	xmlns:fx="http://ns.adobe.com/mxml/2009"
+	xmlns:s="library://ns.adobe.com/flex/spark"
+	xmlns:mx="library://ns.adobe.com/flex/mx"
+	xmlns:c="edu.psu.ist.neocities.control.*"
+	xmlns:m="edu.psu.ist.neocities.model.*"
+	xmlns:v="edu.psu.ist.neocities.view.*"
+	xmlns:sv="edu.psu.ist.neocities.service.*"
+	creationComplete="initApp()" height="100%" width="100%"
+	skinClass="edu.psu.ist.neocities.component.ApplicationBackground"
+	>
+	
+	<!--
+	backgroundColor="0xCCCCCC"-->
+	
+	<fx:Style source="edu/psu/ist/neocities/assets/NeoStyle.css" />
+	<fx:Script>
+		
+	<![CDATA[
+		import com.pnwrain.easyCG.events.ControlEvent;
+		import com.pnwrain.easyCG.model.ModelFactory;
+		
+		import edu.psu.ist.neocities.component.ApplicationBackground;
+		import edu.psu.ist.neocities.component.OldComponent.RecallWindow;
+		import edu.psu.ist.neocities.control.MainController;
+		import edu.psu.ist.neocities.model.RoleModel;
+		import edu.psu.ist.neocities.util.HTTPUtil;
+		import edu.psu.ist.neocities.value.*;
+		import edu.psu.ist.neocities.view.*;
+		
+		import flash.events.TimerEvent;
+		import flash.utils.Timer;
+		
+		import mx.controls.Alert;
+		import mx.core.IFlexDisplayObject;
+		import mx.managers.PopUpManager;
+		import mx.managers.PopUpManagerChildList;
+		import mx.states.State;
+		
+        private const TIMER_INTERVAL:int = 1000;
+        private var baseTimer:int;
+        private var simTimer : Timer;
+        private var versionVO : PlayerVO = new PlayerVO();
+        private var scenarioStarted : Boolean = false;
+        private var loadScenario : LoadScenario;
+        private var loginPopup : Login;
+        private var startUp : StartupView;
+		
+		public var debug : String = HTTPUtil.getParameterValue("debug");
+		
+		private function initApp():void
+		{
+			// Remote Event Handlers 
+			
+			mainController.setStartTimerHandler(doStartTimer);
+			mainController.setStopTimerHandler(doStopTimer);
+			
+			mainController.setPauseAlertHandler(doPauseAlert);
+			mainController.setResouceUpdateHandler(doUpdateResources);
+			
+			mainController.setLoggedInHandler(doLoggedIn);
+			
+			mainController.setEndGameHandler(doEndGame);
+			mainController.setEnableLogInHandler(doEnableLogIn);
+			mainController.setUpdateInfoHandler(doUpdateInfo);
+			
+			
+			
+			//RO request
+			//loadServerData();
+			
+			//Loads the authenticate popup... Sets everything to invisible so they cannot see the interface
+			header.visible=false;
+			//decisionView.visible=false;
+			startUp = StartupView(PopUpManager.createPopUp(this, StartupView, true));
+						
+			//initialize the simulation Timer
+			initializeTimer();
+			
+			//enable the debugWindow button, when debug mode is true
+			trace("NeoCities - debug = " + debug);				
+			if(debug == null){
+				debugPanel.height = 1;
+				debugPanel.visible = false;					
+			}			
+			
+			footerText.text = footerText.text +  " v"  + versionVO.currentFlexVersion;				
+		}//end of initApp
+		
+		/****************************************************************
+		 * Timer Functions
+		 ****************************************************************/
+		
+		private function initializeTimer() : void
+		{
+			simTimer = new Timer(TIMER_INTERVAL);
+            simTimer.addEventListener(TimerEvent.TIMER, updateTimer);
+		}
+		
+		private function doStartTimer(event : ControlEvent):void {
+		    trace("Starting Timer");
+		    baseTimer = getTimer();
+		    simTimer.start();
+		}
+
+        private function doStopTimer(event : ControlEvent):void {
+            simTimer.stop();
+        }
+        
+        private function updateTimer(evt:TimerEvent):void {  
+        	
+        	if (scenarioStarted == false)
+        	// this makes sure that all these events are triggered the first time the timer starts
+        	// which signifies the scenario has started
+        	{
+        		loadScenario.closePopup();
+        		decision.visible = true;
+				header.visible=true;
+				decision.init_view();
+				scenarioStarted = true;
+        	}
+        	          
+            var d:Date = new Date(getTimer() - baseTimer);
+            timeModel.updateSimTime(d);           
+        }
+		
+		/****************************************************************
+		 * Pop-up Windows
+		 ****************************************************************/	
+		
+						
+		private function doLaunchDebugWindow ( ) : void {					
+			var debugPopup : DebugWindow = DebugWindow(PopUpManager.createPopUp(this, DebugWindow, false));
+			
+			return void;
+		}
+							
+	
+		private function doPauseAlert( event : ControlEvent ) : void 
+		{			
+			//var pausePopup : Pause = Pause(PopUpManager.createPopUp(this, Pause, true));
+			var pausePopup :PauseNew = PauseNew(PopUpManager.createPopUp(this, PauseNew, true));
+			var rModel : RoleModel = ModelFactory.getModel("RoleModel") as RoleModel;
+			
+			var event : ControlEvent = new ControlEvent('evt_sendConfMessage');
+			event.data = "Dispatched Pause at " + this.header.tModel.simTime;
+			
+			event.dispatch();
+			
+			return void;
+		}
+		
+
+		/****************************************************************
+		 * Event Functions
+		 ****************************************************************/
+		private function doLoggedIn (event : ControlEvent) : void
+		{
+			loadScenario = LoadScenario(PopUpManager.createPopUp(this,LoadScenario,true));
+			
+			// Sets the banner to whatever role they logged in as...
+			header.setBanner();
+
+		}
+		
+		private function doUpdateResources (event : ControlEvent ) : void
+		{
+			//decisionView.dispatchView.updateResources();
+			
+			//decisionView.smallDispatch.resetView();
+			
+			//decisionView.trackerView.openTrackerGrid.selectedIndex = -1;
+			
+		}
+		
+
+	
+		
+
+		private function loadServerData() : void
+		{
+			var event : ControlEvent = new ControlEvent('evt_serverData');
+			event.dispatch();
+		}					
+									
+		private function doEnableLogIn(event : ControlEvent) : void
+		{
+			if (event.data == "force")
+			{
+				loadServerData();
+				startUp.  closePopUp();
+				
+				if (loadScenario != null)
+				{
+					loadScenario.closePopup();
+				}
+				
+				if (loginPopup != null)
+				{
+					loginPopup.closePopUp();
+				}
+				
+				loginPopup = Login(PopUpManager.createPopUp(this, Login, true));
+			}
+			else if (event.data == "no-force")
+			{
+				if (loginPopup == null || loadScenario == null)
+				{
+					loadServerData();
+					startUp.closePopUp();
+					
+					if (loadScenario != null)
+					{
+						loadScenario.closePopup();
+					}
+					
+					if (loginPopup != null)
+					{
+						loginPopup.closePopUp();
+					}
+					
+					loginPopup = Login(PopUpManager.createPopUp(this, Login, true));
+				}
+			}
+		}
+		
+		private function doEndGame( event : ControlEvent ) : void
+		{
+			var summaryPopup : Summary = Summary(PopUpManager.createPopUp(this,Summary,true));	
+			
+			var event : ControlEvent = new ControlEvent('evt_unsubscribe');
+			event.data = "Unsubscribe to BlazeDS Data Feeds";
+			event.dispatch();	
+		}
+		
+		private function alertMe( _msg : String ) : void
+		{
+			var event : ControlEvent = new ControlEvent('alert');
+			event.data = _msg;
+			event.dispatch();
+		}
+		
+		private function doUpdateInfo(event :ControlEvent)
+		{
+			decision.info.update_view();
+		}
+		
+	
+	]]>
+	</fx:Script>
+	
+	<fx:Style source="edu/psu/ist/neocities/assets/redefinedStyles.css" />
+
+
+ <!--===============================================================================\
+   | Singleton model and controller objects
+ \================================================================================-->
+ 
+	<fx:Declarations>
+		
+	
+		<c:MainController id="mainController"/>
+	 	<c:ServiceController />
+		<sv:ServiceFacade />
+		<m:ScoreModel id="scoreModel" />
+
+		<m:RoleModel />
+		<m:ResourceModel />
+		<m:InformationModel />
+		<m:LocationModel />
+		<!--<m:UnitModel />-->
+		<m:TimeModel id="timeModel" />
+		<m:ImageModel />	
+		<m:PauseModel id="pauseModel" />
+		<m:PlayerModel />	
+		<m:ErrorModel />
+	</fx:Declarations>
+ <!--===============================================================================\
+   | Application canvas and default View
+ \================================================================================-->
+	
+	<s:VGroup id="mainScreen" height="100%" width="100%"
+			  horizontalAlign="center" paddingBottom="0" paddingRight="0" paddingLeft="0" paddingTop="0">
+		
+		<s:VGroup id="mainViewSlot" width="100%" height="99%"
+				  verticalAlign="middle" horizontalAlign="center"
+				  gap="0"
+				  paddingBottom="0" paddingRight="0" 
+				  paddingLeft="0" paddingTop="0">
+			<v:Header id="header"  width="100%" height="54"/>
+			<v:Decision id="decision" width="100%" height="100%" />
+			<!--<v:testInterface height="99%" width="100%" />-->
+
+		</s:VGroup>
+		
+		<s:VGroup id="mainScreenFooter" width="100%" height="1%"
+				  horizontalAlign="center" gap="0">
+			
+			<s:Label text="Copyright 2009 The Pennsylvania State University" fontSize="10" id="footerText" width="100%" textAlign="center"/>	      	
+	      	<!-- Test Buttions -->
+	      	
+			<s:HGroup id="debugPanel"  width="100%" horizontalAlign="center" gap="0">
+				<s:Label text="Debug Panel:" />
+				<s:Button label="Launch DebugWindow" click="doLaunchDebugWindow()" />
+			</s:HGroup>
+		</s:VGroup>
+	</s:VGroup>  	
+	
+</s:Application>
